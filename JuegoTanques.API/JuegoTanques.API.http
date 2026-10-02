@@ -1,0 +1,6 @@
+@JuegoTanques.API_HostAddress = http://localhost:5140
+
+GET {{JuegoTanques.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

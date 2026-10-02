@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="JuegoTanques.AccesoDatos/JuegoTanques.AccesoDatos.csproj" />
+  <Project Path="JuegoTanques.API/JuegoTanques.API.csproj" />
+  <Project Path="JuegoTanques.Dominio/JuegoTanques.Dominio.csproj" />
+  <Project Path="JuegoTanques.LogicaNegocio/JuegoTanques.LogicaNegocio.csproj" />
+  <Project Path="JuegoTanques.Utilitarios/JuegoTanques.Utilitarios.csproj" />
+</Solution>
