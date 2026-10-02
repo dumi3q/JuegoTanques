@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace JuegoTanques.Dominio.Entidades;
 
-public partial class EquipamientosPreguardado
+public partial class EquipamientosPreguardados
 {
     public int PresetId { get; set; }
 
