@@ -20,7 +20,7 @@ public partial class JuegoTanquesContext : DbContext
 
     public virtual DbSet<DetallePartidaJugador> DetallePartidaJugadors { get; set; }
 
-    public virtual DbSet<EquipamientosPreguardado> EquipamientosPreguardados { get; set; }
+    public virtual DbSet<EquipamientosPreguardados> EquipamientosPreguardados { get; set; }
 
     public virtual DbSet<InventarioTanque> InventarioTanques { get; set; }
 
@@ -89,7 +89,7 @@ public partial class JuegoTanquesContext : DbContext
                 .HasConstraintName("FK_Detalle_Usuarios");
         });
 
-        modelBuilder.Entity<EquipamientosPreguardado>(entity =>
+        modelBuilder.Entity<EquipamientosPreguardados>(entity =>
         {
             entity.HasKey(e => e.PresetId).HasName("PK__Equipami__01ED5E7E13501E63");
 

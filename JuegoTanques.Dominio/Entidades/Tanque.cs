@@ -18,7 +18,7 @@ public partial class Tanque
 
     public int Precio { get; set; }
 
-    public virtual ICollection<EquipamientosPreguardado> EquipamientosPreguardados { get; set; } = new List<EquipamientosPreguardado>();
+    public virtual ICollection<EquipamientosPreguardados> EquipamientosPreguardados { get; set; } = new List<EquipamientosPreguardados>();
 
     public virtual ICollection<InventarioTanque> InventarioTanques { get; set; } = new List<InventarioTanque>();
 }

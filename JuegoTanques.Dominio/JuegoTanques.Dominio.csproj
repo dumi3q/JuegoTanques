@@ -8,15 +8,14 @@
 
   <ItemGroup>
     <Folder Include="Clases\" />
-    <Folder Include="DTO\" />
-    <Folder Include="Entidades\" />
-    <Folder Include="EntidadesTipadas\" />
-    <Folder Include="InterfacesAD\" />
-    <Folder Include="InterfacesLN\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JuegoTanques.Utilitarios\JuegoTanques.Utilitarios.csproj" />
   </ItemGroup>
 
 </Project>

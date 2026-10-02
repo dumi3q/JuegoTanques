@@ -26,7 +26,7 @@ public partial class Usuario
 
     public virtual ICollection<DetallePartidaJugador> DetallePartidaJugadors { get; set; } = new List<DetallePartidaJugador>();
 
-    public virtual ICollection<EquipamientosPreguardado> EquipamientosPreguardados { get; set; } = new List<EquipamientosPreguardado>();
+    public virtual ICollection<EquipamientosPreguardados> EquipamientosPreguardados { get; set; } = new List<EquipamientosPreguardados>();
 
     public virtual ICollection<InventarioTanque> InventarioTanques { get; set; } = new List<InventarioTanque>();
 
