@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Implementaciones\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="LinqKit" Version="1.3.11" />
     <PackageReference Include="LinqKit.Core" Version="1.2.11" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.12" />
@@ -24,6 +20,10 @@
     <PackageReference Include="NLog" Version="6.2.1" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.2.1" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="6.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JuegoTanques.Dominio\JuegoTanques.Dominio.csproj" />
   </ItemGroup>
 
 </Project>
