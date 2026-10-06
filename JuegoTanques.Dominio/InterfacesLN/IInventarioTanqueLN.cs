@@ -1,18 +1,17 @@
 ﻿using JuegoTanques.Dominio.EntidadesTipadas;
 using JuegoTanques.Utilitarios;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace JuegoTanques.Dominio.InterfacesLN
 {
     public interface IInventarioTanqueLN
     {
-        Respuesta<TInventarioTanque> Insertar(TInventarioTanque clase);
-        Respuesta<TInventarioTanque> Modificar(TInventarioTanque clase);
-        Respuesta<bool> Eliminar(TInventarioTanque pedido);
-        Respuesta<IEnumerable<TInventarioTanque>> Obtener(TInventarioTanque clase);
-        Respuesta<TInventarioTanque> Buscar(TInventarioTanque clase);
-        Respuesta<IEnumerable<TInventarioTanque>> Listar();
+        Task<Respuesta<TInventarioTanque>> InsertarAsync(TInventarioTanque modelo);
+        Task<Respuesta<TInventarioTanque>> ModificarAsync(TInventarioTanque modelo);
+        Task<Respuesta<bool>> EliminarAsync(int usuarioId, int tanqueId);
+        Task<Respuesta<TInventarioTanque>> ObtenerPorIdAsync(int usuarioId, int tanqueId);
+        Task<Respuesta<IEnumerable<TInventarioTanque>>> ListarAsync();
+        Task<Respuesta<IEnumerable<TInventarioTanque>>> ListarPorUsuarioAsync(int usuarioId);
     }
 }

@@ -8,11 +8,10 @@ namespace JuegoTanques.Dominio.InterfacesLN
 {
     public interface IPartidaLN
     {
-        Respuesta<TPartida> Insertar(TPartida clase);
-        Respuesta<TPartida> Modificar(TPartida clase);
-        Respuesta<bool> Eliminar(TPartida pedido);
-        Respuesta<IEnumerable<TPartida>> Obtener(TPartida clase);
-        Respuesta<TPartida> Buscar(TPartida clase);
-        Respuesta<IEnumerable<TPartida>> Listar();
+        Task<Respuesta<TPartida>> InsertarAsync(TPartida partida);
+        Task<Respuesta<TPartida>> ModificarAsync(TPartida partida);
+        Task<Respuesta<bool>> EliminarAsync(int partidaid);
+        Task<Respuesta<TPartida>> ObtenerPorIdAsync(int partidaid);
+        Task<Respuesta<IEnumerable<TPartida>>> ListarAsync();
     }
 }

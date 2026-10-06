@@ -1,19 +1,16 @@
 ﻿using JuegoTanques.Dominio.EntidadesTipadas;
 using JuegoTanques.Utilitarios;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace JuegoTanques.Dominio.InterfacesLN
 {
     public interface IArmaLN
     {
-        Respuesta<TArma> Insertar(TArma clase);
-        Respuesta<TArma> Modificar(TArma clase);
-        Respuesta<bool> Eliminar(TArma pedido);
-        Respuesta<IEnumerable<TArma>> Obtener(TArma clase);
-        Respuesta<TArma> Buscar(TArma clase);
-        Respuesta<IEnumerable<TArma>> Listar();
-
+        Task<Respuesta<TArma>> InsertarAsync(TArma modelo);
+        Task<Respuesta<TArma>> ModificarAsync(TArma modelo);
+        Task<Respuesta<bool>> EliminarAsync(int armaId);
+        Task<Respuesta<TArma>> ObtenerPorIdAsync(int armaId);
+        Task<Respuesta<IEnumerable<TArma>>> ListarAsync();
     }
 }

@@ -8,11 +8,10 @@ namespace JuegoTanques.Dominio.InterfacesLN
 {
     public interface IRoleLN
     {
-        Respuesta<TRole> Insertar(TRole clase);
-        Respuesta<TRole> Modificar(TRole clase);
-        Respuesta<bool> Eliminar(TRole pedido);
-        Respuesta<IEnumerable<TRole>> Obtener(TRole clase);
-        Respuesta<TRole> Buscar(TRole clase);
-        Respuesta<IEnumerable<TRole>> Listar();
+        Task<Respuesta<TRole>> InsertarAsync(TRole role);
+        Task<Respuesta<TRole>> ModificarAsync(TRole role);
+        Task<Respuesta<bool>> EliminarAsync(int roleid);
+        Task<Respuesta<TRole>> ObtenerPorIdAsync(int roleid);
+        Task<Respuesta<IEnumerable<TRole>>> ListarAsync();
     }
 }

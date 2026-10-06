@@ -10,7 +10,7 @@ using JuegoTanques.Dominio.EntidadesTipadas;
 using Microsoft.EntityFrameworkCore;
 namespace JuegoTanques.AccesoDatos.Implementacione
 {
-    internal class UnidadTrabajoEF : IUnidadTrabajoEF
+    public class UnidadTrabajoEF : IUnidadTrabajoEF
     {
         private readonly JuegoTanquesContext _contexto;
 
@@ -23,7 +23,7 @@ namespace JuegoTanques.AccesoDatos.Implementacione
 
         public IRepositorioAD<EquipamientosPreguardados> TEquipamientosPreguardados { get; }
 
-        public IRepositorioAD<InventarioTanque> TInventarioTanques{ get; }
+        public IRepositorioAD<InventarioTanque> TInventarioTanque{ get; }
 
         public IRepositorioAD<Partida> TPartida { get; }
 
@@ -48,7 +48,7 @@ namespace JuegoTanques.AccesoDatos.Implementacione
             TEquipamientosPreguardados =
                 new RepositorioAD<EquipamientosPreguardados>(_contexto);
 
-            TInventarioTanques =
+            TInventarioTanque =
                 new RepositorioAD<InventarioTanque>(_contexto);
 
             TPartida =
