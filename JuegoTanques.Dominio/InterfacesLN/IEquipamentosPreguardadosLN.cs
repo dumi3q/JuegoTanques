@@ -8,11 +8,11 @@ namespace JuegoTanques.Dominio.InterfacesLN
 {
     public interface IEquipamentosPreguardadosLN
     {
-        Respuesta<TEquipamentosPreguardados> Insertar(TEquipamentosPreguardados clase);
-        Respuesta<TEquipamentosPreguardados> Modificar(TEquipamentosPreguardados clase);
-        Respuesta<bool> Eliminar(TEquipamentosPreguardados pedido);
-        Respuesta<IEnumerable<TEquipamentosPreguardados>> Obtener(TEquipamentosPreguardados clase);
-        Respuesta<TEquipamentosPreguardados> Buscar(TEquipamentosPreguardados clase);
-        Respuesta<IEnumerable<TEquipamentosPreguardados>> Listar();
+        Task<Respuesta<TEquipamientosPreguardados>> InsertarAsync(TEquipamientosPreguardados preset
+            );
+        Task<Respuesta<TEquipamientosPreguardados>> ModificarAsync(TEquipamientosPreguardados preset);
+        Task<Respuesta<bool>> EliminarAsync(int presetid);
+        Task<Respuesta<TEquipamientosPreguardados>> ObtenerPorIdAsync(int presetid  );
+        Task<Respuesta<IEnumerable<TEquipamientosPreguardados>>> ListarAsync();
     }
 }

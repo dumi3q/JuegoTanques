@@ -10,7 +10,7 @@ namespace JuegoTanques.Dominio.InterfacesAD
         IRepositorioAD<Arma> TArma { get; }
         IRepositorioAD<DetallePartidaJugador> TDetallePartidaJugador { get; }
         IRepositorioAD<EquipamientosPreguardados> TEquipamientosPreguardados { get; }
-        IRepositorioAD<InventarioTanque> TInventarioTanques { get; }
+        IRepositorioAD<InventarioTanque> TInventarioTanque { get; }
         IRepositorioAD<Partida> TPartida { get; }
         IRepositorioAD<Role> TRole { get; }
         IRepositorioAD<Tanque> TTanque { get; }

@@ -6,7 +6,7 @@ using System.Text;
 using JuegoTanques.Dominio.EntidadesTipadas;
 namespace JuegoTanques.Dominio.DTO
 {
-    internal class AutoMapperProfile :Profile
+    public class AutoMapperProfile :Profile
     {
         public AutoMapperProfile() { 
            
@@ -16,7 +16,7 @@ namespace JuegoTanques.Dominio.DTO
             
             CreateMap<DetallePartidaJugador, TDetallePartidaJugador>().ReverseMap();
             
-            CreateMap<EquipamientosPreguardados, TEquipamentosPreguardados>().ReverseMap();
+            CreateMap<EquipamientosPreguardados, TEquipamientosPreguardados>().ReverseMap();
             
             CreateMap<InventarioTanque, TInventarioTanque>().ReverseMap();
             

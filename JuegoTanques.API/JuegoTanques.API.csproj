@@ -40,4 +40,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.2.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\JuegoTanques.AccesoDatos\JuegoTanques.AccesoDatos.csproj" />
+    <ProjectReference Include="..\JuegoTanques.Dominio\JuegoTanques.Dominio.csproj" />
+    <ProjectReference Include="..\JuegoTanques.LogicaNegocio\JuegoTanques.LogicaNegocio.csproj" />
+  </ItemGroup>
+
 </Project>

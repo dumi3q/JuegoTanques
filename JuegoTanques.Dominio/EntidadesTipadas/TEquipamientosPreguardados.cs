@@ -4,7 +4,7 @@ using System.Text;
 
 namespace JuegoTanques.Dominio.EntidadesTipadas
 {
-    public class TEquipamentosPreguardados
+    public class TEquipamientosPreguardados
     {
         public int PresetId { get; set; }
 

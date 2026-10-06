@@ -8,11 +8,10 @@ namespace JuegoTanques.Dominio.InterfacesLN
 {
     public interface ITanqueLN
     {
-        Respuesta<TTanque> Insertar(TTanque clase);
-        Respuesta<TTanque> Modificar(TTanque clase);
-        Respuesta<bool> Eliminar(TTanque pedido);
-        Respuesta<IEnumerable<TTanque>> Obtener(TTanque clase);
-        Respuesta<TTanque> Buscar(TTanque clase);
-        Respuesta<IEnumerable<TTanque>> Listar();
+        Task<Respuesta<TTanque>> InsertarAsync(TTanque tanque);
+        Task<Respuesta<TTanque>> ModificarAsync(TTanque tanque);
+        Task<Respuesta<bool>> EliminarAsync(int tanqueid);
+        Task<Respuesta<TTanque>> ObtenerPorIdAsync(int tanqueid);
+        Task<Respuesta<IEnumerable<TTanque>>> ListarAsync();
     }
 }

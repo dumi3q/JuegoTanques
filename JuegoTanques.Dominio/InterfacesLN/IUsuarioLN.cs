@@ -1,18 +1,16 @@
 ﻿using JuegoTanques.Dominio.EntidadesTipadas;
 using JuegoTanques.Utilitarios;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace JuegoTanques.Dominio.InterfacesLN
 {
     public interface IUsuarioLN
     {
-        Respuesta<TUsuario> Insertar(TUsuario clase);
-        Respuesta<TUsuario> Modificar(TUsuario clase);
-        Respuesta<bool> Eliminar(TUsuario pedido);
-        Respuesta<IEnumerable<TUsuario>> Obtener(TUsuario clase);
-        Respuesta<TUsuario> Buscar(TUsuario clase);
-        Respuesta<IEnumerable<TUsuario>> Listar();
+        Task<Respuesta<TUsuario>> InsertarAsync(TUsuario usuario);
+        Task<Respuesta<TUsuario>> ModificarAsync(TUsuario usuario);
+        Task<Respuesta<bool>> EliminarAsync(int usuarioId);
+        Task<Respuesta<TUsuario>> ObtenerPorIdAsync(int usuarioId);
+        Task<Respuesta<IEnumerable<TUsuario>>> ListarAsync();
     }
 }
