@@ -4,4 +4,8 @@
   <Project Path="JuegoTanques.Dominio/JuegoTanques.Dominio.csproj" />
   <Project Path="JuegoTanques.LogicaNegocio/JuegoTanques.LogicaNegocio.csproj" />
   <Project Path="JuegoTanques.Utilitarios/JuegoTanques.Utilitarios.csproj" />
+  <Project Path="JuegoTanquesFront/JuegoTanquesFront.esproj">
+    <Build />
+    <Deploy />
+  </Project>
 </Solution>

@@ -1,0 +1,7 @@
+{
+  "name": "JuegoTanquesFront",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
