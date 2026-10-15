@@ -8,7 +8,8 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular';
 })
 export class AppComponent {
   public paginas = [
-    {title: 'LogIN', url: '/login', icon: 'log-in' }, 
+    { title: 'LogIN', url: '/login', icon: 'log-in' },
+    { title: 'SignUP', url: '/signup', icon: 'person-add' }, 
     { title: 'Inicio', url: '/home', icon: 'home' },
     { title: 'Juego', url: '/game', icon: 'game' },
     { title: 'Configuración', url: '/settings', icon: 'settings' }, 

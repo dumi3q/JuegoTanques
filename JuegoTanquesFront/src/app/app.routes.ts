@@ -1,13 +1,9 @@
 import { Routes } from '@angular/router';
+import { LoginComponent } from './components/login/login.component'; // Ajusta tu ruta si es necesario
+import { SignupComponent } from './components/signup/signup.component';
 
 export const routes: Routes = [
-  {
-    path: 'home',
-    loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
-  },
-  {
-    path: '',
-    redirectTo: 'home',
-    pathMatch: 'full',
-  },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'signup', component: SignupComponent }
 ];
