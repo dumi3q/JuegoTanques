@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@ionic/angular": "^9.0.8",
+    "@ionic/angular-toolkit": "^13.0.0"
+  }
+}
