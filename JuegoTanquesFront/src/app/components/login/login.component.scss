@@ -1,5 +1,14 @@
-.login-bg {
-  --background: #f4f5f8; /* Fondo claro por defecto */
+/* ==========================================
+   ESTILOS GENERALES Y CONTENEDOR DE LOGIN
+   ========================================== */
+:host {
+  display: block;
+  height: 100vh;
+  width: 100%;
+}
+
+ion-content {
+  --background: transparent;
 }
 
 .login-container {
@@ -7,38 +16,69 @@
   justify-content: center;
   align-items: center;
   min-height: 100%;
-  padding: 16px;
-}
-
-.login-card {
   width: 100%;
-  max-width: 400px;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  background: #ffffff;
-  position: relative;
-  padding: 12px 8px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
+/* ==========================================
+   TARJETA CON EFECTO VIDRIO (GLASSMORPHISM)
+   ========================================== */
+.login-card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(15, 15, 15, 0.45); /* Fondo oscuro translúcido elegante */
+  /* Borde con reflejo superior simulando cristal */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  max-width: 420px;
+  padding: 30px;
+  color: #ffffff;
+  position: relative;
+  margin: auto;
+  overflow: hidden; /* Evita que los elementos internos se salgan de las esquinas curvas */
+}
+
+/* ==========================================
+   BOTÓN DE MODO OSCURO / TEMA
+   ========================================== */
 .theme-toggle {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 16px;
+  right: 16px;
   z-index: 10;
+  cursor: pointer;
+
+  ion-button {
+    --background: transparent;
+  }
+
+  ion-icon {
+    font-size: 22px;
+    color: #ffffff;
+  }
 }
 
-ion-card-title {
-  font-size: 1.6rem;
+/* ==========================================
+   TÍTULOS Y SUBTÍTULOS
+   ========================================== */
+h1, ion-card-title {
+  font-size: 1.8rem;
   font-weight: 700;
-  color: #1e1e1e;
+  color: #ffffff !important;
+  margin: 0 0 6px 0;
 }
 
 ion-card-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   margin-top: 4px;
+  color: #cccccc !important;
 
   .link {
-    color: var(--ion-color-primary, #3880ff);
+    color: #4d8aff;
     font-weight: 600;
     cursor: pointer;
 
@@ -48,11 +88,48 @@ ion-card-subtitle {
   }
 }
 
+/* ==========================================
+   ESTILOS PARA INPUTS Y CAMPOS (ION-ITEM)
+   ========================================== */
 .input-group {
   margin-bottom: 16px;
 }
 
+ion-item {
+  --background: rgba(255, 255, 255, 0.08) !important;
+  --border-radius: 14px;
+  border-radius: 14px;
+  overflow: hidden; /* Elimina cuadros negros en esquinas */
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  /* Elimina la línea divisoria inferior nativa de Ionic */
+  --inner-border-width: 0px !important;
+  --border-style: none !important;
+
+  &:focus-within {
+    border-color: rgba(245, 158, 11, 0.8); /* Toque ámbar/fuego al enfocar */
+    background: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  ion-input {
+    --color: #ffffff !important;
+    --placeholder-color: #aaaaaa !important;
+  }
+}
+
+/* ==========================================
+   BOTÓN PRINCIPAL DE ACCIÓN
+   ========================================== */
 .submit-btn {
   margin-top: 24px;
-  font-weight: 600;
+  height: 48px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  --background: #d97706; /* Color ámbar militar combinando con los tanques */
+  --background-hover: #b45309;
+  --border-radius: 14px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
 }

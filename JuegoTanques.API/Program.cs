@@ -28,7 +28,17 @@ builder.Services.AddScoped<IPartidaLN, PartidaLN>();
 builder.Services.AddScoped<IDetallePartidaJugadorLN, DetallePartidaJugadorLN>();
 builder.Services.AddScoped<IEquipamentosPreguardadosLN, EquipamentosPreguardadosLN>();
 builder.Services.AddScoped<IRoleLN, RoleLN>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirIonic", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
+builder.Services.AddControllers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -36,7 +46,13 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+app.UseCors("PermitirIonic");
 
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
