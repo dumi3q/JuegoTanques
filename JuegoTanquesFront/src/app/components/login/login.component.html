@@ -1,51 +1,40 @@
-<ion-content class="login-bg">
+<ion-content>
   <div class="login-container">
-    <ion-card class="login-card">
+    <div class="login-card">
 
-      <!-- Botón para alternar modo oscuro -->
-      <div class="theme-toggle">
-        <ion-button fill="clear" size="small" (click)="toggleDarkMode()">
-          <ion-icon name="moon-outline" slot="icon-only"></ion-icon>
+
+
+      <!-- Títulos y enlace de registro -->
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h1 style="font-size: 26px; font-weight: 700; margin: 0 0 6px 0;">Iniciar Sesión</h1>
+        <p style="font-size: 14px; color: #bbb; margin: 0;">
+          ¿No tienes cuenta? <span (click)="irARegistro()" style="color: #3880ff; cursor: pointer; text-decoration: underline;">Registrate</span>
+        </p>
+      </div>
+
+      <!-- Formulario -->
+      <div>
+        <div class="input-group">
+          <ion-item>
+            <ion-input [(ngModel)]="correo" label="Correo o Usuario" labelPlacement="stacked" placeholder="Ingresa tu usuario"></ion-input>
+          </ion-item>
+        </div>
+
+        <div class="input-group">
+          <ion-item>
+            <ion-input [(ngModel)]="contrasena" type="password" label="Contraseña" labelPlacement="stacked" placeholder="********"></ion-input>
+          </ion-item>
+        </div>
+
+        <ion-text color="danger" *ngIf="error">
+          <p style="font-size: 0.85rem; margin-top: 5px; text-align: center;">{{ error }}</p>
+        </ion-text>
+
+        <ion-button expand="block" class="submit-btn" (click)="ingresar()" [disabled]="cargando">
+          {{ cargando ? 'Ingresando...' : 'INGRESAR AL JUEGO' }}
         </ion-button>
       </div>
 
-      <!-- Encabezado de la Tarjeta -->
-      <ion-card-header>
-        <ion-card-title>Iniciar Sesión</ion-card-title>
-        <ion-card-subtitle>
-          ¿No tienes cuenta? <span class="link" (click)="irARegistro()">Regístrate</span>
-        </ion-card-subtitle>
-      </ion-card-header>
-
-      <!-- Contenido / Formulario -->
-      <ion-card-content>
-        <!-- Campo de Correo / Usuario -->
-        <div class="input-group">
-          <ion-input [(ngModel)]="correo"
-                     label="Correo o Usuario"
-                     labelPlacement="stacked"
-                     fill="outline"
-                     placeholder="Ingresa tu usuario">
-          </ion-input>
-        </div>
-
-        <!-- Campo de Contraseña -->
-        <div class="input-group">
-          <ion-input [(ngModel)]="pass"
-                     type="password"
-                     label="Contraseña"
-                     labelPlacement="stacked"
-                     fill="outline"
-                     placeholder="********">
-          </ion-input>
-        </div>
-
-        <!-- Botón de Ingresar -->
-        <ion-button expand="block" shape="round" class="submit-btn" (click)="iniciarSesion()">
-          Ingresar al Juego
-        </ion-button>
-      </ion-card-content>
-
-    </ion-card>
+    </div>
   </div>
 </ion-content>

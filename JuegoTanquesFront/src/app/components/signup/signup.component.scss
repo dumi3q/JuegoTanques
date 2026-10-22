@@ -1,44 +1,80 @@
-.signup-bg {
-  --background: #f4f5f8; /* Fondo claro por defecto */
+/* ==========================================
+   ESTILOS GENERALES Y LOGIN / SIGNUP
+   ========================================== */
+
+:host {
+  display: block;
+  height: 100vh;
+  width: 100%;
 }
 
-.signup-container {
+ion-content {
+  --background: transparent;
+}
+
+/* Contenedor universal para centrar tarjetas */
+.login-container,
+.signup-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100%;
-  padding: 16px;
-}
-
-.signup-card {
   width: 100%;
-  max-width: 400px;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  background: #ffffff;
-  position: relative;
-  padding: 12px 8px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
+/* ==========================================
+   TARJETA CON EFECTO VIDRIO (GLASSMORPHISM)
+   ========================================== */
+.glass-card,
+.login-card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(15, 15, 15, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  max-width: 420px;
+  padding: 30px;
+  color: #ffffff;
+  position: relative;
+  margin: auto;
+  /* 👉 LA CLAVE 1: Fuerza a que nada interno sobresalga de las esquinas curvas */
+  overflow: hidden;
+}
+
+/* ==========================================
+   ELEMENTOS INTERNOS DE LA TARJETA
+   ========================================== */
 .theme-toggle {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 16px;
+  right: 16px;
   z-index: 10;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 22px;
+    color: #ffffff;
+  }
 }
 
-ion-card-title {
-  font-size: 1.6rem;
+h1, ion-card-title {
+  font-size: 1.8rem;
   font-weight: 700;
-  color: #1e1e1e;
+  color: #ffffff !important;
 }
 
-ion-card-subtitle {
-  font-size: 0.9rem;
+ion-card-subtitle, .subtitle-text {
+  font-size: 0.95rem;
   margin-top: 4px;
+  color: #cccccc !important;
 
   .link {
-    color: var(--ion-color-primary, #3880ff);
+    color: #4d8aff;
     font-weight: 600;
     cursor: pointer;
 
@@ -48,11 +84,65 @@ ion-card-subtitle {
   }
 }
 
-.input-group {
+/* ==========================================
+   ESTILOS PARA INPUTS Y CAMPOS
+   ========================================== */
+ion-item {
+  --background: rgba(255, 255, 255, 0.08) !important;
+  --border-radius: 14px;
+  border-radius: 14px;
+  overflow: hidden; /* 👉 LA CLAVE 2: Elimina los cuadros negros en las esquinas del input */
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
   margin-bottom: 16px;
+  color: #ffffff;
+  /* Elimina la línea inferior nativa de Ionic que causa cortes cuadrados */
+  --inner-border-width: 0px !important;
+  --border-style: none !important;
+
+  &:focus-within {
+    border-color: rgba(245, 158, 11, 0.8);
+    background: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  ion-input {
+    --color: #ffffff !important;
+    --placeholder-color: #aaaaaa !important;
+  }
 }
 
-.submit-btn {
-  margin-top: 24px;
-  font-weight: 600;
+/* ==========================================
+   CHIPS DE SUGERENCIAS DE NOMBRES
+   ========================================== */
+ion-chip {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.35) !important;
+  }
+
+  ion-label {
+    color: inherit;
+  }
+}
+
+/* ==========================================
+   BOTÓN PRINCIPAL DE ACCIÓN
+   ========================================== */
+.submit-btn, ion-button {
+  margin-top: 20px;
+  height: 48px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  --background: #d97706;
+  --background-hover: #b45309;
+  --border-radius: 14px;
+  border-radius: 14px;
+  overflow: hidden; /* 👉 LA CLAVE 3: Asegura esquinas limpias en el botón */
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
 }

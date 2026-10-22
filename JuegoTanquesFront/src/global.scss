@@ -35,3 +35,16 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+/* En variables.scss o global.scss */
+
+body {
+  margin: 0;
+  padding: 0;
+  background-image: url('assets/imgs/fondo_tanques.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Mantiene el fondo quieto al hacer scroll */
+  height: 100vh;
+  width: 100%;
+}

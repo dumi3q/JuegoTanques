@@ -1,0 +1,156 @@
+/* 1. Sombra limpia y fondo blanco absoluto en el menú lateral */
+ion-menu::part(backdrop) {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+ion-menu::part(container) {
+  border-radius: 0;
+  box-shadow: 6px 0px 20px rgba(0, 0, 0, 0.3);
+  background-color: #ffffff !important;
+}
+
+/* 2. Forzar modo claro absoluto en el menú y sus elementos */
+ion-menu {
+  --background: #ffffff !important;
+  --color: #222222 !important;
+
+  ion-toolbar {
+    --background: #ffffff !important;
+    --color: #000000 !important;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  ion-content {
+    --background: #ffffff !important;
+    --color: #222222 !important;
+  }
+
+  ion-list {
+    background: #ffffff !important;
+  }
+
+  ion-item {
+    --background: #ffffff !important;
+    --background-hover: rgba(0, 0, 0, 0.04);
+    --color: #222222 !important;
+    --border-color: #e0e0e0;
+    margin: 0;
+    border-radius: 0;
+
+    ion-icon {
+      color: #444444 !important; /* Color gris oscuro elegante para los iconos */
+      font-size: 1.3rem;
+      margin-right: 16px !important; /* Espacio limpio entre el icono y el texto */
+    }
+
+    ion-label {
+      color: #222222 !important;
+    }
+  }
+}
+
+/* 3. Barra superior de la pantalla principal en blanco */
+ion-toolbar {
+  --background: #ffffff !important;
+  --color: #000000 !important;
+  border-bottom: 1px solid #e0e0e0;
+
+  ion-title {
+    font-weight: bold;
+    color: #000000 !important;
+  }
+}
+
+/* 4. Pantalla principal de la derecha en gris claro limpio (modo claro) */
+.ion-page ion-content {
+  --background: #f4f5f8 !important;
+  --color: #222222 !important;
+  background-color: #f4f5f8 !important;
+  color: #222222 !important;
+
+  h2 {
+    color: #111111 !important;
+    font-weight: bold;
+  }
+
+  p {
+    color: #555555 !important;
+  }
+}
+
+/* ==========================================
+   5. BANNER DE BIENVENIDA CON IMAGEN (OPCIÓN A)
+   ========================================== */
+.welcome-banner {
+  position: relative;
+  width: 100%;
+  height: 200px; /* Altura ideal panorámica */
+  overflow: hidden;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+
+  .banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  /* Capa de degradado oscuro para legibilidad del texto */
+  .banner-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background: linear-gradient( to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100% );
+
+    h2 {
+      color: #ffffff !important;
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin: 0 0 4px 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    p {
+      color: #e0e0e0 !important;
+      font-size: 1rem;
+      margin: 0;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    }
+  }
+}
+
+/* 6. Estilos para las tarjetas del Dashboard */
+.stat-card {
+  background: #ffffff !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+  border-left: 4px solid #38ef7d;
+
+  ion-card-subtitle {
+    font-weight: 600;
+    color: #888888 !important;
+  }
+
+  ion-card-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #222222 !important;
+    margin-top: 4px;
+  }
+
+  ion-card-content {
+    color: #555555 !important;
+    padding-top: 8px;
+  }
+}
+
+.server-online {
+  color: #2ed573 !important;
+}

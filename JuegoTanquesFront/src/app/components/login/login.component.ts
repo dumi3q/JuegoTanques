@@ -1,53 +1,76 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import {
-  IonContent, IonCard, IonCardHeader, IonCardTitle,
-  IonCardSubtitle, IonCardContent, IonInput, IonButton, IonIcon, AlertController
+  IonContent, IonCard, IonItem, IonCardHeader, IonCardTitle,
+  IonCardSubtitle, IonCardContent, IonInput, IonButton,
+  IonIcon, IonButtons, IonText
 } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { moonOutline } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule, IonContent, IonCard, IonCardHeader,
-    IonCardTitle, IonCardSubtitle, IonCardContent, IonInput, IonButton, IonIcon
-  ]
+    CommonModule, FormsModule, RouterModule,
+    IonContent, IonCard, IonCardHeader, IonCardTitle,
+    IonCardSubtitle, IonCardContent, IonInput, IonButton,
+    IonIcon, IonButtons, IonText, IonItem
+  ],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
-  correo: string = '';
-  pass: string = '';
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private alertController: AlertController
-  ) { }
+  correo = '';
+  contrasena = '';
+  error = '';
+  cargando = false;
 
-  toggleDarkMode() {
+  constructor() {
+    addIcons({ 'moon-outline': moonOutline });
+  }
+
+  ingresar(): void {
+    if (!this.correo || !this.contrasena) {
+      this.error = 'Por favor, llena todos los campos.';
+      return;
+    }
+
+    this.cargando = true;
+    this.error = '';
+
+    this.authService.login(this.correo, this.contrasena).subscribe({
+      next: (respuesta) => {
+        if (respuesta.error || !respuesta.data || !this.authService.guardarSesion(respuesta.data)) {
+          this.error = respuesta.error || 'La respuesta de sesión no es válida.';
+          this.cargando = false;
+          return;
+        }
+        this.redirigirSegunRol(respuesta.data.rol);
+      },
+      error: (respuesta) => {
+        this.error = respuesta.error?.error || 'Correo o contraseña inválidos.';
+        this.cargando = false;
+      },
+    });
+  }
+
+  irARegistro(): void {
+    void this.router.navigate(['/signup']);
+  }
+
+  toggleDarkMode(): void {
     document.body.classList.toggle('dark');
   }
 
-  irARegistro() {
-    this.router.navigate(['/signup']);
-  }
-
-  async iniciarSesion() {
-    const exito = this.authService.login(this.correo, this.pass);
-    if (exito) {
-      // Navegar a la pantalla principal del juego (ej: /game o /dashboard)
-      this.router.navigate(['/game']);
-    } else {
-      const alert = await this.alertController.create({
-        header: 'Error de acceso',
-        message: 'Correo o contraseña incorrectos, o la cuenta no existe.',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
+  private redirigirSegunRol(rol: string): void {
+    const destino = rol === 'Cliente' ? '/tienda' : '/';
+    void this.router.navigateByUrl(destino);
   }
 }
