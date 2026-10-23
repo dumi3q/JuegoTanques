@@ -87,21 +87,27 @@
               <ion-input [(ngModel)]="nuevaSala.nombre" placeholder="Ej. Batalla Final"></ion-input>
             </div>
 
-            <!-- SELECTOR DE MAPA CON CARRUSEL DE IMAGEN -->
+            <!-- SELECTOR DE MAPA CON CARRUSEL DE IMAGEN (Sincronizado con MAPAS_JUEGO) -->
             <div class="form-group">
               <label>Seleccionar Mapa de Combate</label>
               <div class="map-carousel">
-                <button class="carousel-arrow" (click)="anteriorMapa()">
+                <button type="button" class="carousel-arrow" (click)="anteriorMapa()">
                   <ion-icon name="chevron-back-outline"></ion-icon>
                 </button>
 
-                <div class="map-card-preview" [style.background-image]="'url(' + mapaSeleccionado.imagen + ')'">
+                <div class="map-card-preview">
+                  <img [src]="mapaSeleccionado.imagen"
+                       [alt]="mapaSeleccionado.nombre"
+                       class="map-img"
+                       (error)="$any($event.target).src = 'assets/imgs/mapas/map1.jpg'" />
+
                   <div class="map-overlay">
-                    <span>{{ mapaSeleccionado.nombre }}</span>
+                    <span class="map-title">{{ mapaSeleccionado.nombre }}</span>
+                    <small class="map-subtitle">{{ mapaSeleccionado.estilo }}</small>
                   </div>
                 </div>
 
-                <button class="carousel-arrow" (click)="siguienteMapa()">
+                <button type="button" class="carousel-arrow" (click)="siguienteMapa()">
                   <ion-icon name="chevron-forward-outline"></ion-icon>
                 </button>
               </div>
@@ -157,5 +163,4 @@
       </ion-content>
     </ng-template>
   </ion-modal>
-
 </ion-content>

@@ -1,28 +1,20 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
-  IonContent, IonButton, IonIcon, IonBadge, IonProgressBar
+  IonContent, IonButton, IonIcon, IonBadge,
+  IonProgressBar
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline, chevronForwardOutline } from 'ionicons/icons';
-
-interface Tanque {
-  id: number;
-  nombre: string;
-  categoria: string;
-  precio: number;
-  imagen: string;
-  blindaje: number; // 0 a 100
-  danio: number;     // 0 a 100
-  velocidad: number; // 0 a 100
-  desbloqueado: boolean;
-}
+import { TANQUES_JUEGO, ARMAS_JUEGO, Tanque, Arma } from '../../models/game-data';
 
 @Component({
   selector: 'app-tienda',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     IonContent,
     IonButton,
     IonIcon,
@@ -34,77 +26,56 @@ interface Tanque {
 })
 export class TiendaComponent {
 
+  tipoCategoria: 'tanques' | 'armas' = 'tanques';
+
+  tanques: Tanque[] = TANQUES_JUEGO;
+  armas: Arma[] = ARMAS_JUEGO;
+
+  indiceActual: number = 0;
+  indiceActualArma: number = 0;
+
   constructor() {
-    // Registra los iconos explicitamente para los botones del carrusel
     addIcons({
       'chevron-back-outline': chevronBackOutline,
       'chevron-forward-outline': chevronForwardOutline
     });
   }
 
-  tanques: Tanque[] = [
-    {
-      id: 1,
-      nombre: 'M4 Sherman',
-      categoria: 'Tanque Mediano',
-      precio: 500,
-      imagen: 'assets/imgs/tanques/sherman.png',
-      blindaje: 60,
-      danio: 55,
-      velocidad: 65,
-      desbloqueado: true
-    },
-    {
-      id: 2,
-      nombre: 'T-34/85',
-      categoria: 'Tanque Mediano',
-      precio: 800,
-      imagen: 'assets/imgs/tanques/t34.png',
-      blindaje: 70,
-      danio: 75,
-      velocidad: 70,
-      desbloqueado: false
-    },
-    {
-      id: 3,
-      nombre: 'Tiger I',
-      categoria: 'Tanque Pesado',
-      precio: 1500,
-      imagen: 'assets/imgs/tanques/tiger.png',
-      blindaje: 95,
-      danio: 90,
-      velocidad: 45,
-      desbloqueado: false
-    }
-  ];
-
-  indiceActual: number = 0;
+  cambiarCategoria(categoria: 'tanques' | 'armas') {
+    this.tipoCategoria = categoria;
+    this.indiceActual = 0;
+    this.indiceActualArma = 0;
+  }
 
   get tanqueActual(): Tanque {
     return this.tanques[this.indiceActual];
   }
 
+  get armaActual(): Arma {
+    return this.armas[this.indiceActualArma];
+  }
+
   siguiente() {
-    if (this.indiceActual < this.tanques.length - 1) {
-      this.indiceActual++;
+    if (this.tipoCategoria === 'tanques') {
+      this.indiceActual = (this.indiceActual + 1) % this.tanques.length;
     } else {
-      this.indiceActual = 0; // Bucle al inicio
+      this.indiceActualArma = (this.indiceActualArma + 1) % this.armas.length;
     }
   }
 
   anterior() {
-    if (this.indiceActual > 0) {
-      this.indiceActual--;
+    if (this.tipoCategoria === 'tanques') {
+      this.indiceActual = (this.indiceActual - 1 + this.tanques.length) % this.tanques.length;
     } else {
-      this.indiceActual = this.tanques.length - 1; // Bucle al final
+      this.indiceActualArma = (this.indiceActualArma - 1 + this.armas.length) % this.armas.length;
     }
   }
 
-  comprarOEquipar(tanque: Tanque) {
-    if (tanque.desbloqueado) {
-      console.log('Equipando tanque:', tanque.nombre);
-    } else {
-      console.log('Comprando tanque:', tanque.nombre);
-    }
+  comprarOEquiparTanque(tanque: Tanque) {
+    console.log('Tanque seleccionado:', tanque.nombre);
+  }
+
+  comprarOEquiparArma(arma: Arma) {
+    console.log('Arma seleccionada:', arma.nombre);
   }
 }

@@ -237,12 +237,13 @@
       color: #fff;
       border-radius: 10px;
       width: 40px;
-      height: 90px;
+      height: 110px; // Se ajustó la altura para dar mejor proporción a la imagen
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
       transition: all 0.2s ease;
+      flex-shrink: 0;
 
       ion-icon {
         font-size: 24px;
@@ -256,27 +257,47 @@
 
     .map-card-preview {
       flex: 1;
-      height: 90px;
+      height: 110px;
       border-radius: 12px;
-      background-size: cover;
-      background-position: center;
       border: 1px solid rgba(255, 255, 255, 0.25);
       position: relative;
       overflow: hidden;
+      background-color: #0b0b0b;
+
+      .map-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
 
       .map-overlay {
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 6px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.4));
+        padding: 8px;
+        display: flex;
+        flex-direction: column; // Ordena el título arriba y el subtítulo abajo
+        align-items: center;
         text-align: center;
 
-        span {
+        .map-title {
           font-weight: 800;
-          font-size: 0.85rem;
+          font-size: 0.95rem;
           color: #fbbf24;
+          line-height: 1.2;
+        }
+
+        .map-subtitle {
+          color: #d1d5db;
+          font-size: 0.72rem;
+          margin-top: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 100%;
         }
       }
     }

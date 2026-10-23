@@ -1,0 +1,140 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+/* Fondo con la imagen del Hangar o ambiente táctico */
+.hangar-bg {
+  --background: url('/assets/imgs/hangar.jpg') no-repeat center center / cover !important;
+}
+
+.offline-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 100%;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Tarjeta Glassmorphism central */
+.glass-config-card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(15, 15, 15, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+  width: 100%;
+  max-width: 460px;
+  padding: 24px;
+  color: #ffffff;
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 20px;
+
+  .category-badge {
+    background: rgba(217, 119, 6, 0.3);
+    color: #fbbf24;
+    border: 1px solid rgba(217, 119, 6, 0.5);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 10px 0 4px 0;
+    color: #ffffff;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: #aaaaaa;
+    margin: 0;
+  }
+}
+
+.config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .config-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #dddddd;
+    }
+  }
+}
+
+/* Botones de opción estilo pestañas */
+.option-buttons {
+  display: flex;
+  gap: 8px;
+
+  button {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #aaa;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 10px 0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.active {
+      background: #d97706;
+      border-color: #fbbf24;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
+    }
+  }
+}
+
+/* Selector desplegable de mapa estilo custom */
+.map-select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+
+  option {
+    background: #1e1e1e;
+    color: #ffffff;
+  }
+}
+
+/* Botón de acción principal */
+.action-btn {
+  --background: #d97706;
+  --background-hover: #b45309;
+  --border-radius: 14px;
+  height: 50px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
+}
