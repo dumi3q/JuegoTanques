@@ -1,0 +1,93 @@
+<ion-content class="hangar-bg">
+  <div class="offline-container">
+
+    <!-- Tarjeta Central de Configuración Offline -->
+    <div class="glass-config-card">
+
+      <div class="card-header">
+        <span class="category-badge">Simulación Táctica</span>
+        <h2>Configurar Partida Offline</h2>
+        <p class="subtitle">Ajusta los parámetros del combate contra la IA</p>
+      </div>
+
+      <!-- Formulario de Configuración -->
+      <div class="config-form">
+
+        <!-- Selector de Dificultad de los Bots -->
+        <div class="config-item">
+          <label>Dificultad de la IA</label>
+          <div class="option-buttons">
+            <button type="button"
+                    [class.active]="config.dificultad === 'facil'"
+                    (click)="config.dificultad = 'facil'">
+              Fácil
+            </button>
+            <button type="button"
+                    [class.active]="config.dificultad === 'normal'"
+                    (click)="config.dificultad = 'normal'">
+              Normal
+            </button>
+            <button type="button"
+                    [class.active]="config.dificultad === 'dificil'"
+                    (click)="config.dificultad = 'dificil'">
+              Difícil
+            </button>
+          </div>
+        </div>
+
+        <!-- Selector de Número de Bots -->
+        <div class="config-item">
+          <label>Cantidad de Bots: <strong>{{ config.numBots }}</strong></label>
+          <ion-range min="1" max="6" step="1" snaps="true" [(ngModel)]="config.numBots" color="warning">
+            <ion-icon slot="start" name="person-outline" size="small"></ion-icon>
+            <ion-icon slot="end" name="people-outline"></ion-icon>
+          </ion-range>
+        </div>
+
+        <!-- Selector de Rondas -->
+        <div class="config-item">
+          <label>Rondas para Ganar: <strong>{{ config.rondas }}</strong></label>
+          <div class="option-buttons">
+            <button type="button"
+                    [class.active]="config.rondas === 3"
+                    (click)="config.rondas = 3">
+              3 Rondas
+            </button>
+            <button type="button"
+                    [class.active]="config.rondas === 5"
+                    (click)="config.rondas = 5">
+              5 Rondas
+            </button>
+            <button type="button"
+                    [class.active]="config.rondas === 7"
+                    (click)="config.rondas = 7">
+              7 Rondas
+            </button>
+          </div>
+        </div>
+
+        <!-- Selector de Mapa -->
+        <div class="config-item">
+          <label>Seleccionar Escenario (Mapa)</label>
+          <select class="map-select" [(ngModel)]="config.mapaSeleccionado">
+            <option value="map1">Ciudad en Ruinas</option>
+            <option value="map2">Pueblo Fronterizo</option>
+            <option value="map3">Complejo Industrial</option>
+            <option value="aleatorio">Mapa Aleatorio</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Botón de Inicio de Partida -->
+      <div class="card-actions">
+        <ion-button expand="block" class="action-btn" (click)="iniciarPartidaOffline()">
+          <ion-icon name="play-outline" slot="start"></ion-icon>
+          INICIAR COMBATE OFFLINE
+        </ion-button>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>

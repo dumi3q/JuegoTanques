@@ -57,11 +57,11 @@
 .glass-shop-card {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  background: rgba(15, 15, 15, 0.55);
+  background: rgba(15, 15, 15, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-top: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 28px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
   width: 100%;
   max-width: 440px;
   padding: 24px;
@@ -70,28 +70,61 @@
   z-index: 10;
 }
 
-.category-badge {
-  background: rgba(217, 119, 6, 0.3);
-  color: #fbbf24;
-  border: 1px solid rgba(217, 119, 6, 0.5);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
+/* Selector de categoría (Tanques / Armas) */
+.category-selector {
+  display: flex;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #aaa;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 8px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.active {
+      background: #d97706;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
+    }
+  }
 }
 
-h2 {
-  font-size: 1.8rem;
-  font-weight: 800;
-  margin: 10px 0 0 0;
-  color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+.card-header {
+  margin-bottom: 10px;
+
+  .category-badge {
+    background: rgba(217, 119, 6, 0.3);
+    color: #fbbf24;
+    border: 1px solid rgba(217, 119, 6, 0.5);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 8px 0 0 0;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  }
 }
 
-/* Vista previa del tanque */
+/* Vista previa del tanque / arma */
 .tank-preview {
-  height: 160px;
+  height: 150px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -105,9 +138,21 @@ h2 {
   }
 }
 
+.skills-preview {
+  margin-bottom: 14px;
+  color: #fbbf24;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Atributos / Progress bars */
 .stats-container {
   margin-bottom: 20px;
+  text-align: left;
 
   .stat-item {
     margin-bottom: 10px;

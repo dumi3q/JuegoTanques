@@ -7,4 +7,9 @@
     <!-- Folder where production build objects will be placed -->
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist\JuegoTanquesFront\browser\</BuildOutputFolder>
   </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="src\assets\imgs\armas\" />
+    <Folder Include="src\assets\imgs\powers\" />
+    <Folder Include="src\assets\imgs\tanques\" />
+  </ItemGroup>
 </Project>

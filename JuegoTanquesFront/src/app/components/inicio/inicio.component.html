@@ -16,13 +16,13 @@
         </ion-item>
 
         <ion-item button (click)="cambiarSeccion('salas')">
-          <ion-icon name="people-outline" slot="start"></ion-icon>
-          <ion-label>Salas</ion-label>
+          <ion-icon name="game-controller-outline" slot="start"></ion-icon>
+          <ion-label>Juego Online</ion-label>
         </ion-item>
 
         <ion-item button (click)="cambiarSeccion('juego')">
-          <ion-icon name="game-controller-outline" slot="start"></ion-icon>
-          <ion-label>Juego Online</ion-label>
+          <ion-icon name="hardware-chip-outline" slot="start"></ion-icon>
+          <ion-label>Juego Offline</ion-label>
         </ion-item>
 
         <ion-item button (click)="cambiarSeccion('tienda')">
@@ -129,9 +129,8 @@
         <div *ngSwitchCase="'salas'" style="height: 100%;">
           <app-salas></app-salas>
         </div>
-        <div *ngSwitchCase="'juego'" class="ion-padding">
-          <h2>Zona de Combate Online</h2>
-          <p>Preparando la partida multijugador...</p>
+        <div *ngSwitchCase="'juego'" style="height: 100%;">
+          <app-offline></app-offline>
         </div>
 
         <!-- SECCIÓN TIENDA -->

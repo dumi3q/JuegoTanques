@@ -9,63 +9,133 @@
     <!-- Tarjeta Glassmorphism Central -->
     <div class="glass-shop-card">
 
-      <!-- Encabezado de la Tarjeta -->
-      <div class="card-header">
-        <span class="category-badge">{{ tanqueActual.categoria }}</span>
-        <h2>{{ tanqueActual.nombre }}</h2>
+      <!-- SELECCIÓN DE CATEGORÍA (TANQUES / ARMAS) -->
+      <div class="category-selector">
+        <button type="button"
+                [class.active]="tipoCategoria === 'tanques'"
+                (click)="cambiarCategoria('tanques')">
+          TANQUES
+        </button>
+        <button type="button"
+                [class.active]="tipoCategoria === 'armas'"
+                (click)="cambiarCategoria('armas')">
+          ARMAS
+        </button>
       </div>
 
-      <!-- Imagen del Tanque -->
-      <div class="tank-preview">
-        <img [src]="tanqueActual.imagen" [alt]="tanqueActual.nombre" class="tank-image" />
-      </div>
-
-      <!-- Atributos / Stats del Tanque -->
-      <div class="stats-container">
-        <div class="stat-item">
-          <div class="stat-label">
-            <span>Blindaje</span>
-            <span>{{ tanqueActual.blindaje }}%</span>
-          </div>
-          <ion-progress-bar [value]="tanqueActual.blindaje / 100" color="warning"></ion-progress-bar>
+      <!-- ================= VISTA DE TANQUES ================= -->
+      <ng-container *ngIf="tipoCategoria === 'tanques'">
+        <div class="card-header">
+          <span class="category-badge">{{ tanqueActual.tanque_id }}</span>
+          <h2>{{ tanqueActual.nombre }}</h2>
         </div>
 
-        <div class="stat-item">
-          <div class="stat-label">
-            <span>Daño de Fuego</span>
-            <span>{{ tanqueActual.danio }}%</span>
-          </div>
-          <ion-progress-bar [value]="tanqueActual.danio / 100" color="danger"></ion-progress-bar>
+        <div class="tank-preview">
+          <img [src]="tanqueActual.imagen" [alt]="tanqueActual.nombre" class="tank-image" />
         </div>
 
-        <div class="stat-item">
-          <div class="stat-label">
-            <span>Velocidad</span>
-            <span>{{ tanqueActual.velocidad }}%</span>
-          </div>
-          <ion-progress-bar [value]="tanqueActual.velocidad / 100" color="success"></ion-progress-bar>
+        <!-- Habilidades Únicas -->
+        <div class="skills-preview">
+          <small>✨ {{ tanqueActual.habilidades.join(' • ') }}</small>
         </div>
-      </div>
 
-      <!-- Botón de Acción / Precio -->
-      <div class="card-actions">
-        <ion-button expand="block" class="action-btn" (click)="comprarOEquipar(tanqueActual)">
-          <ng-container *ngIf="tanqueActual.desbloqueado; else modoCompra">
-            EQUIPAR TANQUE
-          </ng-container>
-          <ng-template #modoCompra>
-            COMPRAR — 🪙 {{ tanqueActual.precio }}
-          </ng-template>
-        </ion-button>
-      </div>
+        <div class="stats-container">
+          <div class="stat-item">
+            <div class="stat-label">
+              <span>Blindaje</span>
+              <span>{{ tanqueActual.blindaje }}%</span>
+            </div>
+            <ion-progress-bar [value]="tanqueActual.blindaje / 100" color="warning"></ion-progress-bar>
+          </div>
 
-      <!-- Indicadores de posición (puntos) -->
-      <div class="dots-indicator">
-        <span *ngFor="let t of tanques; let i = index"
-              [class.active]="i === indiceActual"
-              (click)="indiceActual = i">
-        </span>
-      </div>
+          <div class="stat-item">
+            <div class="stat-label">
+              <span>Vida Base</span>
+              <span>{{ tanqueActual.vida_base }} HP</span>
+            </div>
+            <ion-progress-bar [value]="tanqueActual.vida_base / 200" color="danger"></ion-progress-bar>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <span>Velocidad</span>
+              <span>{{ tanqueActual.velocidad_base }} m/s</span>
+            </div>
+            <ion-progress-bar [value]="tanqueActual.velocidad_base / 10" color="success"></ion-progress-bar>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <ion-button expand="block" class="action-btn" (click)="comprarOEquiparTanque(tanqueActual)">
+            <ng-container *ngIf="tanqueActual.precio === 0; else modoCompraTanque">
+              EQUIPAR TANQUE
+            </ng-container>
+            <ng-template #modoCompraTanque>
+              COMPRAR — 🪙 {{ tanqueActual.precio }}
+            </ng-template>
+          </ion-button>
+        </div>
+
+        <div class="dots-indicator">
+          <span *ngFor="let t of tanques; let i = index"
+                [class.active]="i === indiceActual"
+                (click)="indiceActual = i">
+          </span>
+        </div>
+      </ng-container>
+
+
+      <!-- ================= VISTA DE ARMAS ================= -->
+      <ng-container *ngIf="tipoCategoria === 'armas'">
+        <div class="card-header">
+          <span class="category-badge">{{ armaActual.arma_id }}</span>
+          <h2>{{ armaActual.nombre }}</h2>
+        </div>
+
+        <div class="tank-preview">
+          <img [src]="armaActual.imagen" [alt]="armaActual.nombre" class="tank-image" />
+        </div>
+
+        <div class="skills-preview">
+          <small>⚡ Cadencia: {{ armaActual.cadencia_fuego }}</small>
+        </div>
+
+        <div class="stats-container">
+          <div class="stat-item">
+            <div class="stat-label">
+              <span>Daño Base</span>
+              <span>{{ armaActual.danio_base }} pts</span>
+            </div>
+            <ion-progress-bar [value]="armaActual.danio_base / 100" color="danger"></ion-progress-bar>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <span>Velocidad de Proyectil</span>
+              <span>{{ armaActual.velocidad_proyectil }} m/s</span>
+            </div>
+            <ion-progress-bar [value]="armaActual.velocidad_proyectil / 15" color="primary"></ion-progress-bar>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <ion-button expand="block" class="action-btn" (click)="comprarOEquiparArma(armaActual)">
+            <ng-container *ngIf="armaActual.precio === 0; else modoCompraArma">
+              EQUIPAR ARMA
+            </ng-container>
+            <ng-template #modoCompraArma>
+              COMPRAR — 🪙 {{ armaActual.precio }}
+            </ng-template>
+          </ion-button>
+        </div>
+
+        <div class="dots-indicator">
+          <span *ngFor="let a of armas; let i = index"
+                [class.active]="i === indiceActualArma"
+                (click)="indiceActualArma = i">
+          </span>
+        </div>
+      </ng-container>
 
     </div>
 

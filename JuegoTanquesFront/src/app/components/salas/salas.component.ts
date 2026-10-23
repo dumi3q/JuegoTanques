@@ -12,12 +12,7 @@ import {
   globeOutline, playOutline, closeOutline, keyOutline,
   chevronBackOutline, chevronForwardOutline, shuffleOutline
 } from 'ionicons/icons';
-
-interface Mapa {
-  id: string;
-  nombre: string;
-  imagen: string;
-}
+import { MAPAS_JUEGO, MapaJuego } from '../../models/game-data';
 
 interface Sala {
   id: number;
@@ -58,20 +53,25 @@ export class SalasComponent {
   isModalOpen = false;
   codigoIngresado: string = '';
 
-  // Lista de Mapas disponibles para el carrusel
-  mapas: Mapa[] = [
-    { id: 'aleatorio', nombre: '🎲 Mapa Aleatorio', imagen: 'assets/imgs/mapa_aleatorio.jpg' },
-    { id: 'desierto', nombre: 'Desierto Oxidado', imagen: 'assets/imgs/header.jpg' },
-    { id: 'canon', nombre: 'Cañón Industrial', imagen: 'assets/imgs/settings.jpg' },
-    { id: 'ruinas', nombre: 'Ruinas del Hangar', imagen: 'assets/imgs/hangar.jpg' }
+  // Incluimos la opción de Aleatorio + los 3 mapas oficiales
+  mapas: MapaJuego[] = [
+    {
+      id: 'aleatorio',
+      nombre: '🎲 Mapa Aleatorio',
+      estilo: 'Selección al azar al iniciar la partida',
+      imagen: 'assets/imgs/mapa_aleatorio.jpg', // O una imagen por defecto
+      filas: 16,
+      columnas: 32,
+      matrizColisiones: []
+    },
+    ...MAPAS_JUEGO
   ];
 
   indiceMapaActual: number = 0;
 
-  // Parámetros para crear una nueva sala
   nuevaSala = {
-    nombre: 'Batalla del Desierto',
-    mapa: 'Desierto Oxidado',
+    nombre: 'Batalla táctica',
+    mapa: this.mapas[0].nombre,
     rondas: 3,
     vidas: 3,
     jugadoresMax: 4,
@@ -80,11 +80,10 @@ export class SalasComponent {
     modoEquipos: true
   };
 
-  // Salas activas
   salas: Sala[] = [
-    { id: 1, nombre: 'Comando Alfa - Pro', mapa: 'Desierto Oxidado', jugadoresActuales: 3, jugadoresMaximos: 4, esPrivada: false, modoEquipos: true, rondas: 3 },
-    { id: 2, codigo: 'TANK-9182', nombre: 'Duelo de Honor', mapa: 'Cañón Industrial', jugadoresActuales: 1, jugadoresMaximos: 2, esPrivada: true, modoEquipos: false, rondas: 5 },
-    { id: 3, nombre: 'Guerra de Acero', mapa: 'Ruinas del Hangar', jugadoresActuales: 2, jugadoresMaximos: 4, esPrivada: false, modoEquipos: true, rondas: 3 }
+    { id: 1, nombre: 'Comando Alfa - Pro', mapa: 'Ciudad en Ruinas', jugadoresActuales: 3, jugadoresMaximos: 4, esPrivada: false, modoEquipos: true, rondas: 3 },
+    { id: 2, codigo: 'TANK-9182', nombre: 'Duelo de Honor', mapa: 'Complejo Industrial', jugadoresActuales: 1, jugadoresMaximos: 2, esPrivada: true, modoEquipos: false, rondas: 5 },
+    { id: 3, nombre: 'Guerra de Acero', mapa: 'Pueblo Fronterizo', jugadoresActuales: 2, jugadoresMaximos: 4, esPrivada: false, modoEquipos: true, rondas: 3 }
   ];
 
   constructor() {
@@ -102,7 +101,7 @@ export class SalasComponent {
     });
   }
 
-  get mapaSeleccionado(): Mapa {
+  get mapaSeleccionado(): MapaJuego {
     return this.mapas[this.indiceMapaActual];
   }
 
@@ -126,7 +125,6 @@ export class SalasComponent {
 
   togglePrivada() {
     if (this.nuevaSala.esPrivada) {
-      // Genera un código aleatorio táctico
       const numero = Math.floor(1000 + Math.random() * 9000);
       this.nuevaSala.codigoPrivado = `TANK-${numero}`;
     } else {
@@ -157,15 +155,14 @@ export class SalasComponent {
 
     this.salas.unshift(nueva);
     this.isModalOpen = false;
-    console.log('Sala Creada:', nueva);
   }
 
   unirsePorCodigo() {
     if (!this.codigoIngresado) return;
-    console.log('Buscando y uniéndose a sala con código:', this.codigoIngresado);
+    console.log('Uniéndose con código:', this.codigoIngresado);
   }
 
   unirseSala(sala: Sala) {
-    console.log('Uniéndose a la sala:', sala.nombre);
+    console.log('Uniéndose a:', sala.nombre);
   }
 }
