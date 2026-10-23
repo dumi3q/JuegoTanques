@@ -1,0 +1,78 @@
+<ion-content class="hangar-bg">
+  <div class="tienda-container">
+
+    <!-- Botón Izquierdo del Carrusel -->
+    <button class="nav-btn left-btn" (click)="anterior()" type="button">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </button>
+
+    <!-- Tarjeta Glassmorphism Central -->
+    <div class="glass-shop-card">
+
+      <!-- Encabezado de la Tarjeta -->
+      <div class="card-header">
+        <span class="category-badge">{{ tanqueActual.categoria }}</span>
+        <h2>{{ tanqueActual.nombre }}</h2>
+      </div>
+
+      <!-- Imagen del Tanque -->
+      <div class="tank-preview">
+        <img [src]="tanqueActual.imagen" [alt]="tanqueActual.nombre" class="tank-image" />
+      </div>
+
+      <!-- Atributos / Stats del Tanque -->
+      <div class="stats-container">
+        <div class="stat-item">
+          <div class="stat-label">
+            <span>Blindaje</span>
+            <span>{{ tanqueActual.blindaje }}%</span>
+          </div>
+          <ion-progress-bar [value]="tanqueActual.blindaje / 100" color="warning"></ion-progress-bar>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-label">
+            <span>Daño de Fuego</span>
+            <span>{{ tanqueActual.danio }}%</span>
+          </div>
+          <ion-progress-bar [value]="tanqueActual.danio / 100" color="danger"></ion-progress-bar>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-label">
+            <span>Velocidad</span>
+            <span>{{ tanqueActual.velocidad }}%</span>
+          </div>
+          <ion-progress-bar [value]="tanqueActual.velocidad / 100" color="success"></ion-progress-bar>
+        </div>
+      </div>
+
+      <!-- Botón de Acción / Precio -->
+      <div class="card-actions">
+        <ion-button expand="block" class="action-btn" (click)="comprarOEquipar(tanqueActual)">
+          <ng-container *ngIf="tanqueActual.desbloqueado; else modoCompra">
+            EQUIPAR TANQUE
+          </ng-container>
+          <ng-template #modoCompra>
+            COMPRAR — 🪙 {{ tanqueActual.precio }}
+          </ng-template>
+        </ion-button>
+      </div>
+
+      <!-- Indicadores de posición (puntos) -->
+      <div class="dots-indicator">
+        <span *ngFor="let t of tanques; let i = index"
+              [class.active]="i === indiceActual"
+              (click)="indiceActual = i">
+        </span>
+      </div>
+
+    </div>
+
+    <!-- Botón Derecho del Carrusel -->
+    <button class="nav-btn right-btn" (click)="siguiente()" type="button">
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+    </button>
+
+  </div>
+</ion-content>

@@ -1,0 +1,157 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+/* Fondo con la imagen del Ranking */
+.ranking-bg {
+  --background: url('/assets/imgs/ranking.jpg') no-repeat center center / cover !important;
+}
+
+.ranking-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Tarjeta de Vidrio Flotante */
+.glass-ranking-card {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  background: rgba(12, 12, 12, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+  width: 100%;
+  max-width: 520px;
+  padding: 24px;
+  color: #ffffff;
+}
+
+/* Encabezado */
+.ranking-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+
+  .header-icon {
+    font-size: 28px;
+    color: #fbbf24;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: 1px;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  }
+}
+
+/* Segmento / Filtro */
+.custom-segment {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 20px;
+
+  ion-segment-button {
+    --color: #aaaaaa;
+    --color-checked: #ffffff;
+    --indicator-color: #d97706; /* Ámbar táctico */
+    font-weight: 700;
+  }
+}
+
+/* Lista de Jugadores */
+.ranking-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+  /* Scrollbar personalizado */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.5);
+    border-radius: 4px;
+  }
+}
+
+/* Item de la lista */
+.ranking-item {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  /* Estilos para el TOP 3 */
+  &.top-1 {
+    background: rgba(217, 119, 6, 0.2);
+    border-color: rgba(251, 191, 36, 0.6);
+  }
+
+  &.top-2 {
+    background: rgba(148, 163, 184, 0.15);
+    border-color: rgba(203, 213, 225, 0.5);
+  }
+
+  &.top-3 {
+    background: rgba(180, 83, 9, 0.15);
+    border-color: rgba(217, 119, 6, 0.4);
+  }
+}
+
+.position-badge {
+  font-size: 1.3rem;
+  font-weight: 800;
+  width: 40px;
+  text-align: center;
+}
+
+.player-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+
+  .player-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #ffffff;
+  }
+
+  .player-stats {
+    font-size: 0.8rem;
+    color: #aaaaaa;
+  }
+}
+
+.score-badge {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fbbf24;
+}

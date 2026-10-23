@@ -1,0 +1,104 @@
+<ion-content class="settings-bg">
+  <div class="settings-container">
+
+    <div class="glass-settings-card">
+
+      <div class="settings-header">
+        <ion-icon name="desktop-outline" class="header-icon"></ion-icon>
+        <h2>AJUSTES DE COMBATE</h2>
+      </div>
+
+      <div class="settings-scroll-area">
+
+        <!-- AUDIO -->
+        <div class="setting-group">
+          <h3>
+            <ion-icon name="volume-high-outline"></ion-icon>
+            Audio y Sonido
+          </h3>
+
+          <div class="range-item">
+            <div class="range-label">
+              <span>Música de Fondo</span>
+              <span class="range-val">{{ volumenMusica }}%</span>
+            </div>
+            <ion-range min="0" max="100" [(ngModel)]="volumenMusica" color="warning"></ion-range>
+          </div>
+
+          <div class="range-item">
+            <div class="range-label">
+              <span>Efectos de Fuego y Explosiones</span>
+              <span class="range-val">{{ volumenEfectos }}%</span>
+            </div>
+            <ion-range min="0" max="100" [(ngModel)]="volumenEfectos" color="warning"></ion-range>
+          </div>
+        </div>
+
+        <!-- CONTROLES -->
+        <div class="setting-group">
+          <h3>
+            <ion-icon name="game-controller-outline"></ion-icon>
+            Controles y Manejo
+          </h3>
+
+          <div class="range-item">
+            <div class="range-label">
+              <span>Sensibilidad de Torreta</span>
+              <span class="range-val">{{ sensibilidadApuntado }}%</span>
+            </div>
+            <ion-range min="10" max="100" [(ngModel)]="sensibilidadApuntado" color="warning"></ion-range>
+          </div>
+
+          <div class="toggle-item">
+            <span>Apuntado Asistido</span>
+            <ion-toggle [(ngModel)]="apuntadoAsistido" color="warning"></ion-toggle>
+          </div>
+
+          <div class="toggle-item">
+            <span>Vibración en Impacto</span>
+            <ion-toggle [(ngModel)]="vibracionImpacto" color="warning"></ion-toggle>
+          </div>
+        </div>
+
+        <!-- GRÁFICOS -->
+        <div class="setting-group">
+          <h3>
+            <ion-icon name="desktop-outline"></ion-icon>
+            Gráficos y Visuales
+          </h3>
+
+          <div class="select-item">
+            <span>Calidad Gráfica</span>
+            <ion-select [(ngModel)]="calidadGrafica" interface="popover">
+              <ion-select-option value="baja">Baja (Rendimiento)</ion-select-option>
+              <ion-select-option value="media">Media</ion-select-option>
+              <ion-select-option value="alta">Alta (Recomendado)</ion-select-option>
+              <ion-select-option value="ultra">Ultra (Taller HD)</ion-select-option>
+            </ion-select>
+          </div>
+
+          <div class="toggle-item">
+            <span>Efectos de Humo y Polvo</span>
+            <ion-toggle [(ngModel)]="efectosHumo" color="warning"></ion-toggle>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="actions-footer">
+        <ion-button fill="outline" class="reset-btn" (click)="restablecerValores()">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          DEFAULT
+        </ion-button>
+
+        <ion-button class="save-btn" (click)="guardarAjustes()">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          GUARDAR AJUSTES
+        </ion-button>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>

@@ -1,0 +1,163 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+/* Fondo con la imagen del Hangar */
+.hangar-bg {
+  --background: url('/assets/imgs/hangar.jpg') no-repeat center center / cover !important;
+}
+
+.tienda-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 100%;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  gap: 20px;
+}
+
+/* Botones laterales de navegación estilo flecha */
+.nav-btn {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  width: 55px;
+  height: 80px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+  z-index: 20;
+
+  ion-icon {
+    font-size: 36px;
+    color: #ffffff;
+  }
+
+  &:hover {
+    background: rgba(217, 119, 6, 0.9);
+    border-color: #fbbf24;
+    transform: scale(1.08);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Tarjeta Glassmorphism central de la tienda */
+.glass-shop-card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(15, 15, 15, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  color: #ffffff;
+  text-align: center;
+  z-index: 10;
+}
+
+.category-badge {
+  background: rgba(217, 119, 6, 0.3);
+  color: #fbbf24;
+  border: 1px solid rgba(217, 119, 6, 0.5);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 10px 0 0 0;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Vista previa del tanque */
+.tank-preview {
+  height: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+
+  .tank-image {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8));
+  }
+}
+
+/* Atributos / Progress bars */
+.stats-container {
+  margin-bottom: 20px;
+
+  .stat-item {
+    margin-bottom: 10px;
+
+    .stat-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      color: #dddddd;
+      font-weight: 600;
+    }
+
+    ion-progress-bar {
+      height: 8px;
+      border-radius: 4px;
+    }
+  }
+}
+
+/* Botón de acción */
+.action-btn {
+  --background: #d97706;
+  --background-hover: #b45309;
+  --border-radius: 14px;
+  height: 48px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
+}
+
+/* Indicadores de puntos */
+.dots-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.active {
+      background: #d97706;
+      width: 20px;
+      border-radius: 4px;
+    }
+  }
+}

@@ -1,0 +1,66 @@
+<ion-content class="ranking-bg">
+  <div class="ranking-container">
+
+    <!-- Tarjeta Principal Glassmorphism -->
+    <div class="glass-ranking-card">
+
+      <!-- Título principal -->
+      <div class="ranking-header">
+        <ion-icon name="trophy-outline" class="header-icon"></ion-icon>
+        <h2>SALÓN DE LA FAMA</h2>
+      </div>
+
+      <!-- Selector / Segmento de Filtros -->
+      <ion-segment [value]="filtroActual" (ionChange)="cambiarFiltro($event)" class="custom-segment">
+        <ion-segment-button value="nivel">
+          <ion-label>Por Nivel</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="victorias">
+          <ion-label>Por Victorias</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+
+      <!-- Lista de Jugadores -->
+      <div class="ranking-list-container">
+        <div *ngFor="let jugador of jugadoresOrdenados"
+             class="ranking-item"
+             [ngClass]="{
+            'top-1': jugador.posicion === 1,
+            'top-2': jugador.posicion === 2,
+            'top-3': jugador.posicion === 3
+          }">
+
+          <!-- Medalla / Posición -->
+          <div class="position-badge">
+            <span *ngIf="jugador.posicion === 1">🥇</span>
+            <span *ngIf="jugador.posicion === 2">🥈</span>
+            <span *ngIf="jugador.posicion === 3">🥉</span>
+            <span *ngIf="jugador.posicion > 3">#{{ jugador.posicion }}</span>
+          </div>
+
+          <!-- Información del Jugador -->
+          <div class="player-info">
+            <span class="player-name">{{ jugador.nombre }}</span>
+            <span class="player-stats">
+              <span *ngIf="filtroActual === 'nivel'">Nivel {{ jugador.nivel }}</span>
+              <span *ngIf="filtroActual === 'victorias'">{{ jugador.victorias }} V / {{ jugador.derrotas }} D</span>
+            </span>
+          </div>
+
+          <!-- Indicador Resaltado -->
+          <div class="score-badge">
+            <ng-container *ngIf="filtroActual === 'nivel'">
+              ⭐ Nv. {{ jugador.nivel }}
+            </ng-container>
+            <ng-container *ngIf="filtroActual === 'victorias'">
+              ⚔️ {{ jugador.victorias }}
+            </ng-container>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>
