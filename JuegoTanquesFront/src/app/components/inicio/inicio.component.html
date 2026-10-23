@@ -9,7 +9,7 @@
 
     <ion-content>
       <ion-list lines="inset">
-        <!-- Nueva opción de Inicio / Dashboard -->
+        <!-- Opciones del menú -->
         <ion-item button (click)="cambiarSeccion('inicio')">
           <ion-icon name="home-outline" slot="start"></ion-icon>
           <ion-label>Inicio</ion-label>
@@ -25,7 +25,6 @@
           <ion-label>Juego Online</ion-label>
         </ion-item>
 
-        <!-- Nueva opción de Tienda -->
         <ion-item button (click)="cambiarSeccion('tienda')">
           <ion-icon name="cart-outline" slot="start"></ion-icon>
           <ion-label>Tienda</ion-label>
@@ -67,12 +66,10 @@
     </ion-header>
 
     <ion-content>
-      <div [ngSwitch]="seccionActual">
+      <div [ngSwitch]="seccionActual" style="height: 100%;">
 
         <!-- DASHBOARD DE BIENVENIDA (INICIO) -->
         <div *ngSwitchCase="'inicio'">
-
-          <!-- BANNER CON IMAGEN DE TANQUES (OPCIÓN A) -->
           <div class="welcome-banner">
             <img src="assets/imgs/header.jpg" alt="Encabezado Tanques" class="banner-img" />
             <div class="banner-overlay">
@@ -81,7 +78,6 @@
             </div>
           </div>
 
-          <!-- Tarjetas de datos del Dashboard (con padding alrededor) -->
           <div class="ion-padding">
             <ion-grid class="dashboard-grid">
               <ion-row>
@@ -91,9 +87,7 @@
                       <ion-card-subtitle>Nivel de Tanque</ion-card-subtitle>
                       <ion-card-title>Nivel 1</ion-card-title>
                     </ion-card-header>
-                    <ion-card-content>
-                      Experiencia actual: 0 / 1000 XP
-                    </ion-card-content>
+                    <ion-card-content>Experiencia actual: 0 / 1000 XP</ion-card-content>
                   </ion-card>
                 </ion-col>
 
@@ -103,9 +97,7 @@
                       <ion-card-subtitle>Estadísticas de Batalla</ion-card-subtitle>
                       <ion-card-title>0 Victorias / 0 Derrotas</ion-card-title>
                     </ion-card-header>
-                    <ion-card-content>
-                      Ratio K/D: 0.0
-                    </ion-card-content>
+                    <ion-card-content>Ratio K/D: 0.0</ion-card-content>
                   </ion-card>
                 </ion-col>
 
@@ -115,9 +107,7 @@
                       <ion-card-subtitle>Monedas del Servidor</ion-card-subtitle>
                       <ion-card-title>🪙 500 Monedas</ion-card-title>
                     </ion-card-header>
-                    <ion-card-content>
-                      Listas para gastar en la tienda.
-                    </ion-card-content>
+                    <ion-card-content>Listas para gastar en la tienda.</ion-card-content>
                   </ion-card>
                 </ion-col>
 
@@ -127,9 +117,7 @@
                       <ion-card-subtitle>Estado del Servidor</ion-card-subtitle>
                       <ion-card-title class="server-online">🟢 Conectado (.NET API)</ion-card-title>
                     </ion-card-header>
-                    <ion-card-content>
-                      Puerto 7123 activo y sincronizado.
-                    </ion-card-content>
+                    <ion-card-content>Puerto 7123 activo y sincronizado.</ion-card-content>
                   </ion-card>
                 </ion-col>
               </ion-row>
@@ -138,29 +126,27 @@
         </div>
 
         <!-- OTRAS SECCIONES -->
-        <div *ngSwitchCase="'salas'" class="ion-padding">
-          <h2>Gestión de Salas</h2>
-          <p>Crea o únete a salas para jugar con tus compas.</p>
+        <div *ngSwitchCase="'salas'" style="height: 100%;">
+          <app-salas></app-salas>
         </div>
         <div *ngSwitchCase="'juego'" class="ion-padding">
           <h2>Zona de Combate Online</h2>
           <p>Preparando la partida multijugador...</p>
         </div>
-        <div *ngSwitchCase="'tienda'" class="ion-padding">
-          <h2>Tienda de Equipamiento</h2>
-          <p>Próximamente: Compra skins, tanques pesados y mejoras de armas.</p>
+
+        <!-- SECCIÓN TIENDA -->
+        <div *ngSwitchCase="'tienda'" style="height: 100%;">
+          <app-tienda></app-tienda>
         </div>
-        <div *ngSwitchCase="'perfil'" class="ion-padding">
-          <h2>Perfil del Jugador</h2>
-          <p>Tus estadísticas y datos desde SQL Server.</p>
+
+        <div *ngSwitchCase="'perfil'" style="height: 100%;">
+          <app-perfil></app-perfil>
         </div>
-        <div *ngSwitchCase="'ranking'" class="ion-padding">
-          <h2>Ranking Global</h2>
-          <p>La tabla de líderes del servidor.</p>
+        <div *ngSwitchCase="'ranking'" style="height: 100%;">
+          <app-ranking></app-ranking>
         </div>
-        <div *ngSwitchCase="'configuracion'" class="ion-padding">
-          <h2>Configuración</h2>
-          <p>Ajustes de sonido, controles y preferencias.</p>
+        <div *ngSwitchCase="'configuracion'" style="height: 100%;">
+          <app-configuracion></app-configuracion>
         </div>
 
         <!-- Por defecto carga el inicio/dashboard -->

@@ -1,0 +1,161 @@
+<ion-content class="salas-bg">
+  <div class="salas-container">
+
+    <!-- Tarjeta Principal Glassmorphism -->
+    <div class="glass-salas-card">
+
+      <!-- Encabezado Principal -->
+      <div class="salas-header">
+        <div>
+          <h2>ZONA DE OPERACIONES</h2>
+          <p>Únete a una sala activa o despliega una nueva</p>
+        </div>
+        <ion-button class="create-btn" (click)="abrirModalCrear()">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          CREAR SALA
+        </ion-button>
+      </div>
+
+      <!-- BARRA DE UNIRSE POR CÓDIGO PRIVADO -->
+      <div class="code-join-bar">
+        <ion-icon name="key-outline" class="key-icon"></ion-icon>
+        <ion-input [(ngModel)]="codigoIngresado"
+                   placeholder="Código de Sala (Ej. TANK-8392)"
+                   class="code-input">
+        </ion-input>
+        <ion-button class="code-btn" (click)="unirsePorCodigo()" [disabled]="!codigoIngresado">
+          ENTRAR
+        </ion-button>
+      </div>
+
+      <!-- Lista de Salas Activas -->
+      <div class="salas-list-area">
+        <div *ngFor="let sala of salas" class="sala-card-item">
+
+          <div class="sala-info">
+            <div class="sala-title-row">
+              <h4>{{ sala.nombre }}</h4>
+              <ion-badge [color]="sala.esPrivada ? 'danger' : 'success'">
+                <ion-icon [name]="sala.esPrivada ? 'lock-closed-outline' : 'globe-outline'"></ion-icon>
+                {{ sala.esPrivada ? ('Privada ' + (sala.codigo ? '[' + sala.codigo + ']' : '')) : 'Pública' }}
+              </ion-badge>
+            </div>
+
+            <p class="sala-details">
+              🗺️ <strong>{{ sala.mapa }}</strong> |
+              🔄 Rondas: {{ sala.rondas }} |
+              👥 Equipos: {{ sala.modoEquipos ? 'Sí' : 'No' }}
+            </p>
+          </div>
+
+          <div class="sala-action-row">
+            <div class="players-counter">
+              <ion-icon name="people-outline"></ion-icon>
+              <span>{{ sala.jugadoresActuales }} / {{ sala.jugadoresMaximos }}</span>
+            </div>
+
+            <ion-button size="small" class="join-btn" (click)="unirseSala(sala)" [disabled]="sala.jugadoresActuales >= sala.jugadoresMaximos">
+              <ion-icon name="play-outline" slot="start"></ion-icon>
+              UNIRSE
+            </ion-button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ================= MODAL CREAR SALA ================= -->
+  <ion-modal [isOpen]="isModalOpen" class="custom-modal">
+    <ng-template>
+      <ion-content class="modal-bg">
+        <div class="modal-container">
+          <div class="modal-card">
+
+            <div class="modal-header">
+              <h3>CONFIGURAR NUEVA SALA</h3>
+              <ion-button fill="clear" color="light" (click)="cerrarModal()">
+                <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+
+            <!-- Nombre de la Sala -->
+            <div class="form-group">
+              <label>Nombre de la Sala</label>
+              <ion-input [(ngModel)]="nuevaSala.nombre" placeholder="Ej. Batalla Final"></ion-input>
+            </div>
+
+            <!-- SELECTOR DE MAPA CON CARRUSEL DE IMAGEN -->
+            <div class="form-group">
+              <label>Seleccionar Mapa de Combate</label>
+              <div class="map-carousel">
+                <button class="carousel-arrow" (click)="anteriorMapa()">
+                  <ion-icon name="chevron-back-outline"></ion-icon>
+                </button>
+
+                <div class="map-card-preview" [style.background-image]="'url(' + mapaSeleccionado.imagen + ')'">
+                  <div class="map-overlay">
+                    <span>{{ mapaSeleccionado.nombre }}</span>
+                  </div>
+                </div>
+
+                <button class="carousel-arrow" (click)="siguienteMapa()">
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Cantidad de Rondas: {{ nuevaSala.rondas }}</label>
+                <ion-range min="1" max="7" step="1" [(ngModel)]="nuevaSala.rondas" color="warning"></ion-range>
+              </div>
+
+              <div class="form-group">
+                <label>Vidas por Jugador: {{ nuevaSala.vidas }}</label>
+                <ion-range min="1" max="5" step="1" [(ngModel)]="nuevaSala.vidas" color="warning"></ion-range>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Jugadores Máximos</label>
+                <ion-select [(ngModel)]="nuevaSala.jugadoresMax" interface="popover">
+                  <ion-select-option [value]="2">2 Jugadores</ion-select-option>
+                  <ion-select-option [value]="3">3 Jugadores</ion-select-option>
+                  <ion-select-option [value]="4">4 Jugadores</ion-select-option>
+                </ion-select>
+              </div>
+
+              <div class="form-group toggle-box">
+                <label>¿Modo Equipos?</label>
+                <ion-toggle [(ngModel)]="nuevaSala.modoEquipos" color="warning"></ion-toggle>
+              </div>
+            </div>
+
+            <!-- SWITCH PRIVADA + CÓDIGO GENERADO -->
+            <div class="form-group toggle-box" style="margin-top: 10px;">
+              <div>
+                <label>¿Sala Privada?</label>
+                <small *ngIf="nuevaSala.esPrivada" class="code-generated">
+                  Código: <strong>{{ nuevaSala.codigoPrivado }}</strong>
+                </small>
+              </div>
+              <ion-toggle [(ngModel)]="nuevaSala.esPrivada" (ionChange)="togglePrivada()" color="warning"></ion-toggle>
+            </div>
+
+            <div class="modal-footer">
+              <ion-button expand="block" class="deploy-btn" (click)="crearSala()">
+                DESPLEGAR SALA
+              </ion-button>
+            </div>
+
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>

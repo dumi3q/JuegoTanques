@@ -1,7 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-
+import { PerfilComponent } from '../perfil/perfil.component';
+import { SettingsComponent } from '../settings/settings.component';
+import { RankingComponent } from '../ranking/ranking.component';
+import { TiendaComponent } from '../tienda/tienda.component';
+import { SalasComponent } from '../salas/salas.component';
 // 1. Importa los componentes de Ionic desde el paquete principal (sin el /standalone)
 import {
   IonApp, IonButtons, IonContent, IonHeader, IonMenu,
@@ -10,7 +14,7 @@ import {
   IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol
 } from '@ionic/angular';
 
-// 2. Importa los iconos de Ionicons
+
 import { addIcons } from 'ionicons';
 import {
   homeOutline,
@@ -29,11 +33,11 @@ import {
   styleUrls: ['./inicio.component.scss'],
   standalone: true,
   imports: [
-    CommonModule, IonApp, IonButtons, IonContent, IonHeader, IonMenu,
+    CommonModule, IonApp, IonButtons, SalasComponent, RankingComponent, IonContent, IonHeader, IonMenu,
     IonMenuButton, IonTitle, IonToolbar, IonList, IonItem,
     IonIcon, IonLabel, IonCard, IonCardHeader, IonCardSubtitle,
-    IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol
-  ]
+    IonCardTitle, IonCardContent, PerfilComponent,SettingsComponent,IonGrid, IonRow, IonCol, TiendaComponent
+  ],
 })
 export class InicioComponent {
   private router = inject(Router);

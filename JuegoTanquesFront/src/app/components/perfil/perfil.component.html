@@ -1,0 +1,124 @@
+<ion-content class="perfil-bg">
+  <div class="perfil-container">
+
+    <!-- Tarjeta Principal Glassmorphism -->
+    <div class="glass-perfil-card">
+
+      <!-- Encabezado con Segmentos de Navegación -->
+      <ion-segment [value]="pestanaActiva" (ionChange)="cambiarPestana($event)" class="custom-segment">
+        <ion-segment-button value="general">
+          <ion-label>Identidad</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="inventario">
+          <ion-label>Inventario</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="presets">
+          <ion-label>Presets</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+
+      <!-- ================= VISTA 1: IDENTIDAD / GENERAL ================= -->
+      <div *ngIf="pestanaActiva === 'general'" class="tab-content animate-fade">
+
+        <div class="profile-header-card">
+          <div class="avatar-container">
+            <div class="avatar-ring">
+              <span class="level-badge">Lv. {{ jugador.nivel }}</span>
+            </div>
+          </div>
+          <div class="profile-titles">
+            <h2>{{ jugador.nombre }}</h2>
+            <p class="rank-title">{{ rangoActual }}</p>
+            <div class="coins-pill">
+              🪙 {{ jugador.monedas }} Monedas
+            </div>
+          </div>
+        </div>
+
+        <div class="loadout-summary">
+          <h3>Equipamiento Activo en Combate</h3>
+
+          <div class="loadout-item">
+            <ion-icon name="shield-outline"></ion-icon>
+            <div class="loadout-info">
+              <span>Tanque Principal</span>
+              <strong>{{ jugador.tanqueEquipado }}</strong>
+            </div>
+          </div>
+
+          <div class="loadout-item">
+            <ion-icon name="hardware-chip-outline"></ion-icon>
+            <div class="loadout-info">
+              <span>Armamento</span>
+              <strong>{{ jugador.armaEquipada }}</strong>
+            </div>
+          </div>
+
+          <div class="loadout-item">
+            <ion-icon name="construct-outline"></ion-icon>
+            <div class="loadout-info">
+              <span>Módulos Extra</span>
+              <strong>{{ jugador.equipamientoActivo }}</strong>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= VISTA 2: INVENTARIO ================= -->
+      <div *ngIf="pestanaActiva === 'inventario'" class="tab-content animate-fade">
+        <h3>Tanques en Propiedad</h3>
+        <div class="inventory-grid">
+          <div *ngFor="let t of inventarioTanques" class="inv-card" [class.equipped]="t.estado === 'Equipado'">
+            <div class="inv-img-box">
+              <img [src]="t.img" [alt]="t.nombre" />
+            </div>
+            <div class="inv-details">
+              <h4>{{ t.nombre }}</h4>
+              <span>{{ t.tipo }}</span>
+              <ion-badge [color]="t.estado === 'Equipado' ? 'warning' : 'medium'">
+                {{ t.estado }}
+              </ion-badge>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 16px;">Armas Desbloqueadas</h3>
+        <div class="weapons-list">
+          <div *ngFor="let w of inventarioArmas" class="weapon-row">
+            <div>
+              <strong>{{ w.nombre }}</strong>
+              <small>{{ w.tipo }}</small>
+            </div>
+            <ion-badge [color]="w.estado === 'Equipado' ? 'warning' : 'light'">
+              {{ w.estado }}
+            </ion-badge>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VISTA 3: PRESETS ================= -->
+      <div *ngIf="pestanaActiva === 'presets'" class="tab-content animate-fade">
+        <div class="presets-header">
+          <h3>Tus Configuraciones</h3>
+          <ion-button size="small" class="action-btn" (click)="guardarPresetActual()">
+            Guardar Actual
+          </ion-button>
+        </div>
+
+        <div class="presets-list">
+          <div *ngFor="let p of presets" class="preset-card">
+            <div class="preset-info">
+              <h4><ion-icon name="bookmark-outline"></ion-icon> {{ p.nombre }}</h4>
+              <p>🛡️ {{ p.tanque }} | ⚔️ {{ p.arma }}</p>
+              <small>🛠️ {{ p.equipamiento }}</small>
+            </div>
+            <ion-button fill="outline" size="small" color="warning">Cargar</ion-button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>
