@@ -12,5 +12,10 @@ export const routes: Routes = [
   { path: 'store', loadComponent: () => import('./components/tienda/tienda.component').then(m => m.TiendaComponent) },
   { path: 'signup', loadComponent: () => import('./components/signup/signup.component').then(m => m.SignupComponent) }, 
   // Por si escriben cualquier otra cosa, los manda al login
+  {
+    path: 'game',
+    loadComponent: () => import('./game-engine/game-play.component').then(m => m.GamePlayComponent)
+  },
+
   { path: '**', redirectTo: 'login' }
 ];

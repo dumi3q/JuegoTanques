@@ -53,18 +53,27 @@ export class SalasComponent {
   isModalOpen = false;
   codigoIngresado: string = '';
 
-  // Incluimos la opción de Aleatorio + los 3 mapas oficiales
-  mapas: MapaJuego[] = [
+  // Incluimos la opción de Aleatorio adaptada a la interfaz y los 3 mapas oficiales
+  mapas: (MapaJuego & { imagen?: string })[] = [
     {
       id: 'aleatorio',
       nombre: '🎲 Mapa Aleatorio',
-      estilo: 'Selección al azar al iniciar la partida',
-      imagen: 'assets/imgs/mapa_aleatorio.jpg', // O una imagen por defecto
-      filas: 16,
-      columnas: 32,
-      matrizColisiones: []
+      tipo: 'Aleatorio',
+      descripcion: 'Selección al azar al iniciar la partida',
+      matrizColisiones: [],
+      imagen: 'assets/imgs/mapas/map1.png' // O una imagen por defecto
     },
-    ...MAPAS_JUEGO
+    ...MAPAS_JUEGO.map(m => {
+      // Asigna la imagen correspondiente según el ID del mapa
+      let archivoImg = 'map1.png';
+      if (m.id === 'mapa_2') archivoImg = 'map2.png';
+      if (m.id === 'mapa_3') archivoImg = 'map3.png';
+
+      return {
+        ...m,
+        imagen: `assets/imgs/mapas/${archivoImg}`
+      };
+    })
   ];
 
   indiceMapaActual: number = 0;
@@ -81,9 +90,9 @@ export class SalasComponent {
   };
 
   salas: Sala[] = [
-    { id: 1, nombre: 'Comando Alfa - Pro', mapa: 'Ciudad en Ruinas', jugadoresActuales: 3, jugadoresMaximos: 4, esPrivada: false, modoEquipos: true, rondas: 3 },
-    { id: 2, codigo: 'TANK-9182', nombre: 'Duelo de Honor', mapa: 'Complejo Industrial', jugadoresActuales: 1, jugadoresMaximos: 2, esPrivada: true, modoEquipos: false, rondas: 5 },
-    { id: 3, nombre: 'Guerra de Acero', mapa: 'Pueblo Fronterizo', jugadoresActuales: 2, jugadoresMaximos: 4, esPrivada: false, modoEquipos: true, rondas: 3 }
+    { id: 1, nombre: 'Comando Alfa - Pro', mapa: 'Mapa 1', jugadoresActuales: 3, jugadoresMaximos: 4, esPrivada: false, modoEquipos: true, rondas: 3 },
+    { id: 2, codigo: 'TANK-9182', nombre: 'Duelo de Honor', mapa: 'Mapa 2', jugadoresActuales: 1, jugadoresMaximos: 2, esPrivada: true, modoEquipos: false, rondas: 5 },
+    { id: 3, nombre: 'Guerra de Acero', mapa: 'Mapa 3', jugadoresActuales: 2, jugadoresMaximos: 4, esPrivada: false, modoEquipos: true, rondas: 3 }
   ];
 
   constructor() {
@@ -101,7 +110,7 @@ export class SalasComponent {
     });
   }
 
-  get mapaSeleccionado(): MapaJuego {
+  get mapaSeleccionado() {
     return this.mapas[this.indiceMapaActual];
   }
 
