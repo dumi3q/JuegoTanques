@@ -1,14 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import {
-  IonContent, IonCard, IonCardHeader, IonCardTitle,
-  IonCardSubtitle, IonCardContent, IonInput, IonButton,
-  IonIcon, IonButtons, IonText, IonChip, IonLabel, IonItem
+  IonContent, IonInput, IonButton, IonChip, IonLabel, IonItem
 } from '@ionic/angular';
-import { addIcons } from 'ionicons';
-import { moonOutline } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -16,9 +13,7 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [
     CommonModule, FormsModule, RouterModule,
-    IonContent, IonCard, IonCardHeader, IonCardTitle,
-    IonCardSubtitle, IonCardContent, IonInput, IonButton,
-    IonIcon, IonButtons, IonText, IonChip, IonLabel, IonItem
+    IonContent, IonInput, IonButton, IonChip, IonLabel, IonItem
   ],
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss'],
@@ -26,42 +21,43 @@ import { AuthService } from '../../services/auth.service';
 export class SignupComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  // Campos de Registro
-  cedula = '';
+  // Campos del formulario
   nombre = '';
-  apellido = '';
   correo = '';
   contrasena = '';
 
-  // Control OTP, sugerencias y estados
+  // Paso 2: código que llega al correo
   verificarCorreo = false;
   codigoOtp = '';
+
+  // Estado de la pantalla
   error = '';
   mensaje = '';
   codigoDesarrollo = '';
   cargando = false;
-  sugerenciasNombres: string[] = []; // 👈 Variable para almacenar las sugerencias
+  sugerenciasNombres: string[] = [];
 
-  constructor() {
-    addIcons({ 'moon-outline': moonOutline });
-  }
-
+  // ---------- Paso 1: crear la cuenta y pedir el código ----------
   registrar(): void {
+    if (this.cargando) return; // evita enviar dos veces
+
+    this.nombre = this.nombre.trim();
+    this.correo = this.correo.trim();
+
     if (!this.nombre || !this.correo || !this.contrasena) {
-      this.error = 'Por favor, llena los campos obligatorios.';
+      this.error = 'Llena el usuario, el correo y la contraseña.';
       return;
     }
 
     this.cargando = true;
     this.error = '';
     this.mensaje = '';
-    this.sugerenciasNombres = []; // Limpiamos sugerencias previas
+    this.sugerenciasNombres = [];
 
     this.authService.registrar({
-      cedula: this.cedula || '000000000',
       nombre: this.nombre,
-      apellido: this.apellido || 'N/A',
       correo: this.correo,
       contrasena: this.contrasena,
     }).subscribe({
@@ -69,37 +65,37 @@ export class SignupComponent {
         if (respuesta.error || !respuesta.data) {
           this.error = respuesta.error || 'No fue posible crear la cuenta.';
           this.cargando = false;
+          this.actualizarPantalla();
           return;
         }
-
         this.verificarCorreo = true;
         this.mensaje = respuesta.data.mensaje;
         this.codigoDesarrollo = respuesta.data.codigoDesarrollo ?? '';
         this.cargando = false;
+        this.actualizarPantalla();
       },
-      error: (respuesta) => {
-        this.error = respuesta.error?.error || 'No fue posible crear la cuenta.';
-
-        // 👈 Atrapamos las sugerencias si el backend las envía
-        if (respuesta.error?.sugerencias) {
-          this.sugerenciasNombres = respuesta.error.sugerencias;
-        }
-
+      error: (e: HttpErrorResponse) => {
+        this.mostrarError(e, 'No fue posible crear la cuenta.');
         this.cargando = false;
+        this.actualizarPantalla();
       },
     });
   }
 
-  // 👈 Método para seleccionar una sugerencia y rellenar el campo de nombre automáticamente
+  // Toca un nombre sugerido y se pone solo en el campo
   usarSugerencia(sugerencia: string): void {
     this.nombre = sugerencia;
     this.sugerenciasNombres = [];
     this.error = '';
   }
 
+  // ---------- Paso 2: confirmar el código ----------
   confirmarCorreo(): void {
+    if (this.cargando) return;
+
+    this.codigoOtp = this.codigoOtp.trim();
     if (!this.codigoOtp) {
-      this.error = 'Ingresa el código OTP.';
+      this.error = 'Escribe el código que te llegó al correo.';
       return;
     }
 
@@ -115,43 +111,71 @@ export class SignupComponent {
         if (respuesta.error || !respuesta.data || !this.authService.guardarSesion(respuesta.data)) {
           this.error = respuesta.error || 'No fue posible verificar el correo.';
           this.cargando = false;
+          this.actualizarPantalla();
           return;
         }
-        this.redirigirSegunRol(respuesta.data.rol);
-      },
-      error: (respuesta) => {
-        this.error = respuesta.error?.error || 'Código incorrecto o expirado.';
         this.cargando = false;
+        this.actualizarPantalla();
+        // Cuenta creada y sesión iniciada: al menú principal
+        void this.router.navigateByUrl('/home');
+      },
+      error: (e: HttpErrorResponse) => {
+        this.mostrarError(e, 'Código incorrecto o vencido.');
+        this.cargando = false;
+        this.actualizarPantalla();
       },
     });
   }
 
   reenviarCodigo(): void {
+    if (this.cargando) return;
+
     this.cargando = true;
     this.error = '';
+    this.mensaje = '';
 
     this.authService.reenviarCodigo(this.correo).subscribe({
       next: (respuesta) => {
-        this.mensaje = respuesta.data || 'Se solicitó un nuevo código.';
+        this.mensaje = respuesta.data || 'Te enviamos un nuevo código.';
         this.cargando = false;
+        this.actualizarPantalla();
       },
-      error: () => {
-        this.error = 'No fue posible solicitar un nuevo código.';
+      error: (e: HttpErrorResponse) => {
+        this.mostrarError(e, 'No fue posible pedir un nuevo código.');
         this.cargando = false;
+        this.actualizarPantalla();
       },
     });
+  }
+
+  // Si el correo estaba mal escrito, vuelve al formulario
+  volverAlFormulario(): void {
+    this.verificarCorreo = false;
+    this.codigoOtp = '';
+    this.codigoDesarrollo = '';
+    this.error = '';
+    this.mensaje = '';
   }
 
   irALogin(): void {
     void this.router.navigate(['/login']);
   }
 
-  toggleDarkMode(): void {
-    document.body.classList.toggle('dark');
+  // Muestra el mensaje de error de la API (y los nombres sugeridos si vienen)
+  private mostrarError(e: HttpErrorResponse, porDefecto: string): void {
+    if (e.status === 0) {
+      this.error = 'No se pudo conectar con el servidor. Revisa que la API esté corriendo y la dirección de environment.ts.';
+      return;
+    }
+    this.error = e.error?.error || porDefecto;
+    if (Array.isArray(e.error?.sugerencias)) {
+      this.sugerenciasNombres = e.error.sugerencias;
+    }
   }
 
-  private redirigirSegunRol(rol: string): void {
-    const destino = rol === 'Cliente' ? '/tienda' : '/';
-    void this.router.navigateByUrl(destino);
+  // Fuerza a Angular a redibujar la pantalla con los valores nuevos
+  // (así no depende de zone.js para mostrar el paso del código, los errores o los botones)
+  private actualizarPantalla(): void {
+    this.cdr.detectChanges();
   }
 }

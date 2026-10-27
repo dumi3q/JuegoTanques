@@ -1,6 +1,19 @@
-@JuegoTanques.API_HostAddress = http://localhost:5140
+@host = https://localhost:7123
 
-GET {{JuegoTanques.API_HostAddress}}/weatherforecast/
-Accept: application/json
+### 1. Registrar
+POST {{host}}/api/Auth/Registrar
+Content-Type: application/json
 
-###
+{ "nombre": "Evans", "correo": "tucorreo@gmail.com", "contrasena": "123456" }
+
+### 2. Verificar el código (el que te llegó al correo)
+POST {{host}}/api/Auth/VerificarCorreo
+Content-Type: application/json
+
+{ "correo": "tucorreo@gmail.com", "codigo": "000000" }
+
+### 3. Login
+POST {{host}}/api/Auth/Login
+Content-Type: application/json
+
+{ "correo": "Evans", "contrasena": "123456" }

@@ -5,6 +5,10 @@ using JuegoTanques.Dominio.InterfacesLN;
 using JuegoTanques.Dominio.DTO;
 using JuegoTanques.LogicaNegocio.Implementaciones;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using JuegoTanques.API.Servicios;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +43,33 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
+
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<ICorreoServicio, CorreoServicio>();
+builder.Services.AddSingleton<JwtServicio>();
+builder.Services.AddScoped<AuthServicio>();
+
+builder.Services.AddCors(o => o.AddPolicy("Front", p => p
+    .SetIsOriginAllowed(_ => true)   // para desarrollo
+    .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opciones =>
+    {
+        opciones.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Emisor"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audiencia"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Clave"]!)),
+            ValidateLifetime = true
+        };
+    });
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -52,11 +83,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-app.Run();
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
+app.UseAuthentication();
 
 app.Run();

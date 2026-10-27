@@ -2,19 +2,19 @@
   <div class="signup-wrapper">
     <div class="glass-card">
 
-   
       <!-- Título principal -->
       <div style="text-align: center; margin-bottom: 24px;">
         <h1 style="font-size: 26px; font-weight: 700; margin: 0 0 6px 0;">Crear Cuenta</h1>
         <p style="font-size: 14px; color: #bbb; margin: 0;">
-          ¿Ya tienes cuenta? <span (click)="irALogin()" style="color: #3880ff; cursor: pointer; text-decoration: underline;">Inicia sesión</span>
+          ¿Ya tienes cuenta?
+          <span (click)="irALogin()" style="color: #3880ff; cursor: pointer; text-decoration: underline;">Inicia sesión</span>
         </p>
       </div>
 
-      <!-- Formulario de Registro -->
+      <!-- PASO 1: Formulario de registro -->
       <div *ngIf="!verificarCorreo">
         <ion-item style="--background: rgba(255,255,255,0.08); --border-radius: 12px; margin-bottom: 14px; color: #fff;">
-          <ion-input label="Nombre" labelPlacement="stacked" [(ngModel)]="nombre" placeholder="Tu nombre"></ion-input>
+          <ion-input label="Usuario" labelPlacement="stacked" [(ngModel)]="nombre" placeholder="Tu nombre de jugador"></ion-input>
         </ion-item>
 
         <ion-item style="--background: rgba(255,255,255,0.08); --border-radius: 12px; margin-bottom: 14px; color: #fff;">
@@ -22,15 +22,15 @@
         </ion-item>
 
         <ion-item style="--background: rgba(255,255,255,0.08); --border-radius: 12px; margin-bottom: 20px; color: #fff;">
-          <ion-input label="Contraseña" labelPlacement="stacked" [(ngModel)]="contrasena" placeholder="********" type="password"></ion-input>
+          <ion-input label="Contraseña" labelPlacement="stacked" [(ngModel)]="contrasena" placeholder="Mínimo 6 caracteres" type="password" (keyup.enter)="registrar()"></ion-input>
         </ion-item>
 
-        <!-- Mensaje de Error -->
+        <!-- Mensaje de error -->
         <p *ngIf="error" style="color: #ff4961; text-align: center; font-size: 13px; margin-bottom: 12px;">{{ error }}</p>
 
-        <!-- Sugerencias de Nombres -->
-        <div *ngIf="sugerenciasNombres && sugerenciasNombres.length > 0" style="text-align: center; margin-bottom: 15px;">
-          <p style="font-size: 12px; margin-bottom: 6px; color: #ddd;">¿Te gustaría usar alguno de estos nombres?</p>
+        <!-- Nombres sugeridos cuando el usuario está ocupado -->
+        <div *ngIf="sugerenciasNombres.length > 0" style="text-align: center; margin-bottom: 15px;">
+          <p style="font-size: 12px; margin-bottom: 6px; color: #ddd;">Estos nombres están libres, toca uno:</p>
           <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;">
             <ion-chip *ngFor="let sug of sugerenciasNombres" (click)="usarSugerencia(sug)" style="background: rgba(255,255,255,0.2); color: #fff; cursor: pointer;">
               <ion-label>{{ sug }}</ion-label>
@@ -38,10 +38,34 @@
           </div>
         </div>
 
-        <!-- Botón de Registro -->
         <ion-button expand="block" (click)="registrar()" [disabled]="cargando" style="height: 48px; font-weight: 700; --border-radius: 12px;">
           {{ cargando ? 'REGISTRANDO...' : 'REGISTRARSE EN EL JUEGO' }}
         </ion-button>
+      </div>
+
+      <!-- PASO 2: Código de verificación -->
+      <div *ngIf="verificarCorreo">
+        <p *ngIf="mensaje" style="text-align: center; font-size: 14px; color: #ddd; margin: 0 0 16px 0;">{{ mensaje }}</p>
+
+        <!-- Solo aparece en desarrollo cuando el correo no se pudo enviar -->
+        <p *ngIf="codigoDesarrollo" style="text-align: center; font-size: 13px; color: #ffc409; margin: 0 0 16px 0;">
+          Código de prueba: <strong style="font-size: 20px; letter-spacing: 3px;">{{ codigoDesarrollo }}</strong>
+        </p>
+
+        <ion-item style="--background: rgba(255,255,255,0.08); --border-radius: 12px; margin-bottom: 20px; color: #fff;">
+          <ion-input label="Código de verificación" labelPlacement="stacked" [(ngModel)]="codigoOtp" placeholder="123456" inputmode="numeric" maxlength="6" (keyup.enter)="confirmarCorreo()"></ion-input>
+        </ion-item>
+
+        <p *ngIf="error" style="color: #ff4961; text-align: center; font-size: 13px; margin-bottom: 12px;">{{ error }}</p>
+
+        <ion-button expand="block" (click)="confirmarCorreo()" [disabled]="cargando" style="height: 48px; font-weight: 700; --border-radius: 12px;">
+          {{ cargando ? 'VERIFICANDO...' : 'VERIFICAR CÓDIGO' }}
+        </ion-button>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+          <ion-button fill="clear" size="small" (click)="volverAlFormulario()" [disabled]="cargando">Cambiar correo</ion-button>
+          <ion-button fill="clear" size="small" (click)="reenviarCodigo()" [disabled]="cargando">Reenviar código</ion-button>
+        </div>
       </div>
 
     </div>
