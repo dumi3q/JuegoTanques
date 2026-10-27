@@ -274,7 +274,7 @@ export class GamePlayComponent implements OnInit, OnDestroy {
 
   @ViewChild('gameCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
-  private gameMap = new GameMap('mapa_3');
+  private gameMap!: GameMap;
   public playerTank!: Tank;
   private animationFrameId: number = 0;
 
@@ -397,6 +397,11 @@ export class GamePlayComponent implements OnInit, OnDestroy {
       }
     }
     return { x: 950, y: 360 };
+  }
+  // 'map1' -> 'mapa_1', 'mapa_2' -> 'mapa_2'. Si no entiende el valor, usa mapa_3.
+  private normalizarMapaId(valor: string | undefined): string {
+    const numero = (valor ?? '').match(/\d+/)?.[0];
+    return numero && ['1', '2', '3'].includes(numero) ? `mapa_${numero}` : 'mapa_3';
   }
 
   private endRound(reason: 'player_dead' | 'bots_dead' | 'timeout') {
@@ -839,7 +844,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     }
     this.setWeapon('WEAP-02');
 
-    const tankData = TANQUES_JUEGO[2]; // 0 = Scout, 1 = Juggernaut, 2 = Vanguardia
-    this.animationFrameId = requestAnimationFrame(this.startGameLoop);
+
   }
 }

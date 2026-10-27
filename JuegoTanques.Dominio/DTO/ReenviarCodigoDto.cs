@@ -1,7 +1,6 @@
-﻿namespace JuegoTanques.Dominio.DTO
+﻿namespace JuegoTanques.Dominio.DTO;
+
+public class ReenviarCodigoDto
 {
-    public class ReenviarCodigoDto
-    {
-        public string Correo { get; set; }
-    }
+    public string Correo { get; set; } = string.Empty;
 }

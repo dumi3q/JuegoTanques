@@ -1,8 +1,7 @@
-﻿namespace JuegoTanques.Dominio.DTO
+﻿namespace JuegoTanques.Dominio.DTO;
+
+public class VerificarCorreoDto
 {
-    public class VerificarCorreoDto
-    {
-        public string Correo { get; set; }
-        public string Codigo { get; set; }
-    }
+    public string Correo { get; set; } = string.Empty;
+    public string Codigo { get; set; } = string.Empty;
 }

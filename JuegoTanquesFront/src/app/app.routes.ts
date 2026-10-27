@@ -1,21 +1,24 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { InicioComponent } from './components/inicio/inicio.component';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  // Ruta inicial que te manda al Login
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
 
-  // Ruta para tu menú principal con el dashboard y las secciones
-  { path: 'home', component: InicioComponent },
-  { path: 'store', loadComponent: () => import('./components/tienda/tienda.component').then(m => m.TiendaComponent) },
-  { path: 'signup', loadComponent: () => import('./components/signup/signup.component').then(m => m.SignupComponent) }, 
-  // Por si escriben cualquier otra cosa, los manda al login
-  {
-    path: 'game',
-    loadComponent: () => import('./game-engine/game-play.component').then(m => m.GamePlayComponent)
-  },
+  // Públicas
+  { path: 'login', component: LoginComponent },
+  { path: 'signup', loadComponent: () => import('./components/signup/signup.component').then(m => m.SignupComponent) },
+
+  // Requieren sesión
+  { path: 'home', component: InicioComponent, canActivate: [authGuard] },
+  { path: 'offline', loadComponent: () => import('./components/offline/offline.component').then(m => m.OfflineComponent), canActivate: [authGuard] },
+  { path: 'store', loadComponent: () => import('./components/tienda/tienda.component').then(m => m.TiendaComponent), canActivate: [authGuard] },
+  { path: 'salas', loadComponent: () => import('./components/salas/salas.component').then(m => m.SalasComponent), canActivate: [authGuard] },
+  { path: 'ranking', loadComponent: () => import('./components/ranking/ranking.component').then(m => m.RankingComponent), canActivate: [authGuard] },
+  { path: 'perfil', loadComponent: () => import('./components/perfil/perfil.component').then(m => m.PerfilComponent), canActivate: [authGuard] },
+  { path: 'settings', loadComponent: () => import('./components/settings/settings.component').then(m => m.SettingsComponent), canActivate: [authGuard] },
+  { path: 'game', loadComponent: () => import('./game-engine/game-play.component').then(m => m.GamePlayComponent), canActivate: [authGuard] },
 
   { path: '**', redirectTo: 'login' }
 ];

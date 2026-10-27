@@ -75,7 +75,7 @@ export class AuthService {
       return false;
     }
 
-    localStorage.removeItem(this.claveSesion);
+    localStorage.setItem(this.claveSesion, JSON.stringify(sesion));
     sessionStorage.setItem(this.claveSesion, JSON.stringify(sesion));
     return true;
   }
@@ -115,7 +115,7 @@ export class AuthService {
   }
 
   private leerSesionAlmacenada(): ISesionRespuesta | null {
-    const valor = sessionStorage.getItem(this.claveSesion);
+    const valor = localStorage.getItem(this.claveSesion);
     if (!valor) return null;
     try {
       const sesion: unknown = JSON.parse(valor);

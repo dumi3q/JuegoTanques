@@ -15,7 +15,7 @@ public partial class JuegoTanquesContext : DbContext
         : base(options)
     {
     }
-
+    public virtual DbSet<InventarioArma> InventarioArmas { get; set; }
     public virtual DbSet<Arma> Armas { get; set; }
 
     public virtual DbSet<DetallePartidaJugador> DetallePartidaJugadors { get; set; }
@@ -51,6 +51,21 @@ public partial class JuegoTanquesContext : DbContext
                 .HasColumnName("nombre");
             entity.Property(e => e.Precio).HasColumnName("precio");
             entity.Property(e => e.VelocidadProyectil).HasColumnName("velocidad_proyectil");
+        });
+
+        modelBuilder.Entity<InventarioArma>(entity =>
+        {
+            entity.HasKey(e => new { e.UsuarioId, e.ArmaId });
+            entity.ToTable("InventarioArmas");
+
+            entity.Property(e => e.UsuarioId).HasColumnName("usuario_id");
+            entity.Property(e => e.ArmaId).HasColumnName("arma_id");
+            entity.Property(e => e.FechaAdquisicion).HasColumnType("datetime").HasColumnName("fecha_adquisicion");
+
+            entity.HasOne(d => d.Arma).WithMany().HasForeignKey(d => d.ArmaId)
+                .OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK_InventarioArmas_Armas");
+            entity.HasOne(d => d.Usuario).WithMany().HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK_InventarioArmas_Usuarios");
         });
 
         modelBuilder.Entity<DetallePartidaJugador>(entity =>

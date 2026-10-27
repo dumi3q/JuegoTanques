@@ -1,8 +1,8 @@
-﻿namespace JuegoTanques.Dominio.DTO
+﻿namespace JuegoTanques.Dominio.DTO;
+
+public class LoginSolicitudDto
 {
-    public class LoginSolicitudDto
-    {
-        public string Correo { get; set; }
-        public string Contrasena { get; set; }
-    }
+    // Puede venir el correo o el nombre de usuario
+    public string Correo { get; set; } = string.Empty;
+    public string Contrasena { get; set; } = string.Empty;
 }

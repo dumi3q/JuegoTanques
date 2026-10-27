@@ -1,4 +1,4 @@
-﻿using JuegoTanques.Dominio.DTO;
+﻿using JuegoTanques.API.Servicios;
 using JuegoTanques.Dominio.DTO;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,88 +8,37 @@ namespace JuegoTanques.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        // Lista temporal en memoria para simular usuarios registrados (puedes cambiarlo por tu DbContext luego)
-        private static List<string> usuariosRegistrados = new List<string> { "evans", "admin", "test" };
+        private readonly AuthServicio _auth;
+
+        public AuthController(AuthServicio auth)
+        {
+            _auth = auth;
+        }
 
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] LoginSolicitudDto credenciales)
-        {
-            return Ok(new
-            {
-                error = (string)null,
-                data = new
-                {
-                    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummytoken",
-                    idUsuario = 1,
-                    nombre = credenciales.Correo,
-                    rol = "Cliente"
-                }
-            });
-        }
+        public async Task<IActionResult> Login([FromBody] LoginSolicitudDto datos)
+            => Responder(await _auth.LoginAsync(datos), StatusCodes.Status401Unauthorized);
 
         [HttpPost("Registrar")]
-        public IActionResult Registrar([FromBody] RegistroUsuarioDto datos)
-        {
-            // 1. Validamos si el nombre de usuario ya existe en nuestra "base de datos"
-            if (usuariosRegistrados.Contains(datos.Nombre.ToLower()))
-            {
-                // Si ya existe, armamos las sugerencias automáticas
-                var sugerencias = new List<string>
-                {
-                    $"{datos.Nombre}_123",
-                    $"{datos.Nombre}.tank",
-                    $"Player_{datos.Nombre}",
-                    $"{datos.Nombre}{new Random().Next(10, 99)}"
-                };
-
-                return BadRequest(new
-                {
-                    error = "El nombre de usuario ya se encuentra registrado.",
-                    sugerencias = sugerencias
-                });
-            }
-
-            // 2. Si no existe, simulamos que lo guardamos
-            usuariosRegistrados.Add(datos.Nombre.ToLower());
-
-            // 3. Generamos el código OTP (en un sistema real aquí iría el código de correo)
-            string codigoOtpFicticio = "123456";
-
-            return Ok(new
-            {
-                error = (string)null,
-                data = new
-                {
-                    mensaje = $"Cuenta creada con éxito. Código enviado a {datos.Correo}",
-                    codigoDesarrollo = codigoOtpFicticio // 👈 Esto hace que aparezca el código en Ionic para probar de una
-                }
-            });
-        }
+        public async Task<IActionResult> Registrar([FromBody] RegistroUsuarioDto datos)
+            => Responder(await _auth.RegistrarAsync(datos));
 
         [HttpPost("VerificarCorreo")]
-        public IActionResult VerificarCorreo([FromBody] VerificarCorreoDto datos)
-        {
-            return Ok(new
-            {
-                error = (string)null,
-                data = new
-                {
-                    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.dummytoken",
-                    idUsuario = 1,
-                    nombre = "Usuario Verificado",
-                    rol = "Cliente"
-                }
-            });
-        }
+        public async Task<IActionResult> VerificarCorreo([FromBody] VerificarCorreoDto datos)
+            => Responder(await _auth.VerificarCorreoAsync(datos));
 
         [HttpPost("ReenviarCodigo")]
-        public IActionResult ReenviarCodigo([FromBody] ReenviarCodigoDto datos)
+        public async Task<IActionResult> ReenviarCodigo([FromBody] ReenviarCodigoDto datos)
+            => Responder(await _auth.ReenviarCodigoAsync(datos));
+
+        // Todas las respuestas tienen la forma { error, data } que espera el front.
+        // Si hay error, también puede venir { sugerencias } con nombres libres.
+        private IActionResult Responder<T>(ResultadoAuth<T> resultado, int codigoError = StatusCodes.Status400BadRequest)
         {
-            return Ok(new
-            {
-                error = (string)null,
-                data = "Se ha enviado un nuevo código de verificación."
-            });
+            if (resultado.Exito)
+                return Ok(new { error = (string?)null, data = resultado.Datos });
+
+            return StatusCode(codigoError, new { error = resultado.Error, sugerencias = resultado.Sugerencias });
         }
     }
 }

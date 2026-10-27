@@ -10,9 +10,7 @@ export interface IGoogleLoginSolicitud {
 }
 
 export interface IRegistroUsuarioSolicitud {
-  cedula: string;
   nombre: string;
-  apellido: string;
   correo: string;
   contrasena: string;
 }
