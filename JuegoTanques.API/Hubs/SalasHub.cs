@@ -20,6 +20,14 @@ namespace JuegoTanques.API.Hubs
 
         private string Nombre => Context.User?.FindFirstValue(ClaimTypes.Name) ?? "Jugador";
 
+        // Identidad autoritativa para la pantalla online. Primero consulta al miembro
+        // enlazado a la conexión actual en la sala, luego recurre al claim del token.
+        public int ObtenerMiUsuarioId()
+        {
+            var usuarioIdSala = _salas.UsuarioIdDe(Context.ConnectionId);
+            return usuarioIdSala ?? UsuarioId;
+        }
+
         // ----- Lobby -----
         public Task<List<SalaResumenDto>> ListarSalas() => Task.FromResult(_salas.Listar());
 
@@ -30,8 +38,6 @@ namespace JuegoTanques.API.Hubs
             // 🟢 Extraemos la sala y su código real de la respuesta
             if (respuesta != null && respuesta.Sala != null)
             {
-                var codigoSala = respuesta.Sala.Codigo;
-                await Groups.AddToGroupAsync(Context.ConnectionId, codigoSala);
                 await Clients.All.SendAsync("ListaSalasActualizada", _salas.Listar());
             }
 
@@ -44,9 +50,6 @@ namespace JuegoTanques.API.Hubs
 
             if (respuesta != null && respuesta.Sala != null)
             {
-                var codigoSala = respuesta.Sala.Codigo;
-                await Groups.AddToGroupAsync(Context.ConnectionId, codigoSala);
-                await Clients.Group(codigoSala).SendAsync("SalaActualizada", respuesta.Sala);
                 await Clients.All.SendAsync("ListaSalasActualizada", _salas.Listar());
             }
 
@@ -68,48 +71,46 @@ namespace JuegoTanques.API.Hubs
 
         public Task<string?> CambiarColor(string color) => Task.FromResult<string?>(null);
 
-        public Task<string?> IniciarPartida()
-      => _salas.IniciarAsync(Context.ConnectionId, UsuarioId);
+        public async Task<string?> IniciarPartida()
+        {
+            // Compatibilidad; la UI inicia automáticamente cuando todos estén listos.
+            return await _salas.IniciarAsync(Context.ConnectionId, UsuarioId);
+        }
 
         // ----- Partida -----
         public async Task EstoyListo()
         {
-            await _salas.MarcarListoAsync(Context.ConnectionId);
-            var codigo = _salas.CodigoDe(Context.ConnectionId);
-
-            if (codigo != null)
-            {
-                // Notificamos al grupo de la sala que el jugador cambió su estado de listo
-                await Clients.Group(codigo).SendAsync("SalasCambiaron");
-            }
+            var error = await _salas.MarcarListoAsync(Context.ConnectionId);
+            if (error != null) throw new HubException(error);
         }
-
-        public Task ReportarMuerte(int killerUsuarioId)
-            => _salas.ReportarMuerteAsync(Context.ConnectionId, killerUsuarioId);
 
         public Task EnviarEstado(EstadoJugadorMsg estado)
+            => _salas.ActualizarEstadoAsync(Context.ConnectionId, estado);
+
+        public async Task EnviarDisparo(DisparoMsg disparo)
         {
-            var codigo = _salas.CodigoDe(Context.ConnectionId);
-            return codigo is null
-                ? Task.CompletedTask
-                : Clients.OthersInGroup(codigo).SendAsync("EstadoRemoto", estado with { UsuarioId = UsuarioId });
+            var publicado = disparo with { UsuarioId = UsuarioId };
+            var registrado = await _salas.RegistrarDisparoAsync(Context.ConnectionId, publicado);
+            if (!registrado) throw new HubException("No se pudo registrar el disparo (la ronda no está activa o la bala ya existe).");
         }
 
-        public Task EnviarDisparo(DisparoMsg disparo)
-        {
-            var codigo = _salas.CodigoDe(Context.ConnectionId);
-            return codigo is null
-                ? Task.CompletedTask
-                : Clients.OthersInGroup(codigo).SendAsync("DisparoRemoto", disparo with { UsuarioId = UsuarioId });
-        }
+        public Task<ResultadoImpactoDto> RegistrarImpacto(string balaId)
+            => _salas.RegistrarImpactoAsync(Context.ConnectionId, balaId);
+
+        public Task<List<PowerUpOnlineDto>> ListarPowerUps()
+            => Task.FromResult(_salas.ListarPowerUps(Context.ConnectionId));
+
+        public Task<bool> CrearPowerUp(PowerUpOnlineDto item)
+            => _salas.CrearPowerUpAsync(Context.ConnectionId, item);
+
+        public Task<bool> RecogerPowerUp(string id)
+            => _salas.RecogerPowerUpAsync(Context.ConnectionId, id);
 
         public Task LanzarZona(ZonaMsg zona)
-        {
-            var codigo = _salas.CodigoDe(Context.ConnectionId);
-            return codigo is null
-                ? Task.CompletedTask
-                : Clients.OthersInGroup(codigo).SendAsync("ZonaRemota", zona with { UsuarioId = UsuarioId });
-        }
+            => _salas.LanzarZonaVenenoAsync(Context.ConnectionId, zona);
+
+        public Task<ResultadoImpactoDto> AplicarVeneno(int atacanteUsuarioId)
+            => _salas.AplicarVenenoAsync(Context.ConnectionId, atacanteUsuarioId);
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {

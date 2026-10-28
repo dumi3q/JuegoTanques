@@ -183,7 +183,9 @@ export class SalasComponent implements ViewWillEnter, OnInit, OnDestroy {
         jugadoresMaximos: Number(this.nuevaSala.jugadoresMax),
         privada: this.nuevaSala.esPrivada,
         codigoPersonalizado: this.nuevaSala.esPrivada ? this.nuevaSala.codigoPrivado : null,
-        presetId: null
+        // null permite al backend seleccionar el preset activo del usuario.
+        presetId: null,
+        modoEquipos: Boolean(this.nuevaSala.modoEquipos)
       };
 
       const respuesta = await this.signalrService.crearSala(datosCreacion);

@@ -35,7 +35,7 @@ export class SalaEsperaComponent implements OnInit, OnDestroy {
   usuarioIdActual: number = 0;
   esHost: boolean = false;
   miEstadoListo: boolean = false;
-
+  readonly fotoPredeterminada = 'assets/imgs/tanques/scout.png'
   private subSala?: Subscription;
   private subPartida?: Subscription;
 
@@ -63,6 +63,39 @@ export class SalaEsperaComponent implements OnInit, OnDestroy {
     }
   }
 
+  obtenerFotoPerfil(jugador: any): string {
+    const posiblesFotos = [
+      jugador?.fotoPerfil,
+      jugador?.FotoPerfil,
+      jugador?.foto_perfil,
+      jugador?.Foto_Perfil
+    ];
+
+    const foto = posiblesFotos.find(
+      valor => typeof valor === 'string' && valor.trim().length > 0
+    );
+
+    return typeof foto === 'string'
+      ? foto.trim()
+      : this.fotoPredeterminada;
+  }
+
+  /**
+   * Si la URL o la imagen almacenada no funcionan, muestra el avatar
+   * predeterminado sin crear un bucle de errores.
+   */
+  manejarErrorFoto(event: Event): void {
+    const imagen = event.target as HTMLImageElement | null;
+
+    if (!imagen) {
+      return;
+    }
+
+    if (imagen.getAttribute('src') !== this.fotoPredeterminada) {
+      imagen.src = this.fotoPredeterminada;
+    }
+  }
+
   async ngOnInit(): Promise<void> {
     // 1. Recibir datos del Hub en tiempo real
     this.subSala = this.signalrService.salaActual$.subscribe((detalle: any) => {
@@ -85,7 +118,7 @@ export class SalaEsperaComponent implements OnInit, OnDestroy {
     });
 
     // 2. Si el BehaviorSubject ya tenía la sala guardada al navegar
-    const valorActual = (this.signalrService as any).salaActualSubject?.value;
+    const valorActual = this.signalrService.getSalaActual();
     if (valorActual) {
       console.log('🔍 [LOBBY DEBUG] Valor actual en subject:', JSON.stringify(valorActual, null, 2));
       const datosCrudos = valorActual.sala ? valorActual.sala : valorActual;
@@ -98,7 +131,7 @@ export class SalaEsperaComponent implements OnInit, OnDestroy {
 
     this.subPartida = this.signalrService.partidaIniciada$.subscribe((detalle: any) => {
       if (detalle) {
-        void this.router.navigate(['/game']);
+        void this.router.navigate(['/game-online']);
       }
     });
   }
@@ -118,8 +151,9 @@ export class SalaEsperaComponent implements OnInit, OnDestroy {
   async marcarListo(): Promise<void> {
     try {
       await this.signalrService.marcarListo();
-    } catch (e) {
+    } catch (e: any) {
       console.error('Error al marcar listo:', e);
+      alert(e?.message || 'No se pudo actualizar el estado de listo.');
     }
   }
 

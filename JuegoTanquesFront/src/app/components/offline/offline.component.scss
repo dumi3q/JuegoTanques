@@ -4,7 +4,7 @@
   width: 100%;
 }
 
-/* Fondo con la imagen del Hangar o ambiente táctico */
+/* Fondo original del hangar */
 .hangar-bg {
   --background: url('/assets/imgs/hangar.jpg') no-repeat center center / cover !important;
 }
@@ -20,7 +20,7 @@
   box-sizing: border-box;
 }
 
-/* Tarjeta Glassmorphism central */
+/* Tarjeta glassmorphism original */
 .glass-config-card {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -40,6 +40,7 @@
   margin-bottom: 20px;
 
   .category-badge {
+    display: inline-block;
     background: rgba(217, 119, 6, 0.3);
     color: #fbbf24;
     border: 1px solid rgba(217, 119, 6, 0.5);
@@ -53,7 +54,7 @@
   h2 {
     font-size: 1.5rem;
     font-weight: 800;
-    margin: 10px 0 4px 0;
+    margin: 10px 0 4px;
     color: #ffffff;
   }
 
@@ -61,6 +62,37 @@
     font-size: 0.85rem;
     color: #aaaaaa;
     margin: 0;
+  }
+}
+
+/* Resumen deliberadamente compacto para no alterar el layout anterior */
+.preset-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background: rgba(217, 119, 6, 0.10);
+  border: 1px solid rgba(251, 191, 36, 0.22);
+
+  .preset-label {
+    color: #fbbf24;
+    font-size: 0.67rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+
+  strong {
+    color: #ffffff;
+    font-size: 0.87rem;
+    font-weight: 700;
+  }
+
+  small {
+    color: #bdbdbd;
+    font-size: 0.7rem;
+    line-height: 1.35;
   }
 }
 
@@ -83,13 +115,13 @@
   }
 }
 
-/* Botones de opción estilo pestañas */
 .option-buttons {
   display: flex;
   gap: 8px;
 
   button {
     flex: 1;
+    min-width: 0;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: #aaa;
@@ -109,7 +141,6 @@
   }
 }
 
-/* Selector desplegable de mapa estilo custom */
 .map-select {
   width: 100%;
   background: rgba(255, 255, 255, 0.08);
@@ -128,7 +159,11 @@
   }
 }
 
-/* Botón de acción principal */
+.card-actions {
+  display: flex;
+  flex-direction: column;
+}
+
 .action-btn {
   --background: #d97706;
   --background-hover: #b45309;
@@ -137,4 +172,29 @@
   font-weight: 800;
   letter-spacing: 0.5px;
   box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
+}
+
+@media (max-width: 480px) {
+  .offline-container {
+    padding: 14px 12px;
+    align-items: flex-start;
+  }
+
+  .glass-config-card {
+    margin: auto 0;
+    padding: 20px 17px;
+    border-radius: 23px;
+  }
+
+  .card-header h2 {
+    font-size: 1.35rem;
+  }
+
+  .option-buttons {
+    gap: 6px;
+
+    button {
+      font-size: 0.74rem;
+    }
+  }
 }

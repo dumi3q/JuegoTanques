@@ -23,9 +23,9 @@ interface AbilityInfo {
 }
 
 const ABILIDADES: { [tankId: string]: AbilityInfo } = {
-  'TANK-01': { id: 'dash', icon: '💨', nombre: 'DASH', cooldownMs: 6000, durationMs: 200 },
-  'TANK-02': { id: 'slow', icon: '🌀', nombre: 'RALENTIZAR', cooldownMs: 12000, durationMs: 5000 },
-  'TANK-03': { id: 'pierce', icon: '🔮', nombre: 'PERFORANTE', cooldownMs: 10000, durationMs: 0 }
+  'TANK-01': { id: 'dash', icon: '💨', nombre: 'DASH', cooldownMs: 5500, durationMs: 320 },
+  'TANK-02': { id: 'slow', icon: '☠️', nombre: 'VENENO', cooldownMs: 12000, durationMs: 6000 },
+  'TANK-03': { id: 'pierce', icon: '🎯', nombre: 'PERFORANTE', cooldownMs: 9500, durationMs: 0 }
 };
 
 @Component({
@@ -35,7 +35,9 @@ const ABILIDADES: { [tankId: string]: AbilityInfo } = {
   template: `
     <ion-content class="game-container" [scrollY]="false">
       <div class="canvas-wrapper">
-        <canvas #gameCanvas></canvas>
+        <canvas #gameCanvas (pointermove)="onCanvasPointerMove($event)" (pointerdown)="onCanvasPointerDown($event)"></canvas>
+        <button class="offline-exit" type="button" (click)="salirPartida()">SALIR ✕</button>
+        <div class="offline-controls">WASD / Flechas: mover · Ratón: apuntar · Clic / Espacio: disparar · E: habilidad</div>
 
         <div class="top-hud">
           <div class="hud-box round-box">
@@ -100,6 +102,9 @@ const ABILIDADES: { [tankId: string]: AbilityInfo } = {
   `,
   styles: [`
     .game-container { --background: #000000; }
+    .offline-exit { position:absolute; top:16px; right:16px; z-index:40; border:1px solid #ff526f; border-radius:9px; padding:8px 13px; color:#fff; background:rgba(110,12,30,.86); font-weight:800; cursor:pointer; }
+    .offline-controls { position:absolute; top:16px; left:16px; z-index:20; max-width:55vw; padding:7px 10px; color:#dbe7f5; background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.15); border-radius:8px; font:11px/1.4 system-ui,sans-serif; pointer-events:none; }
+    @media (max-width:700px) { .offline-controls { display:none; } }
     .canvas-wrapper {
       position: relative;
       display: flex;
@@ -301,6 +306,8 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
   private dashDirY: number = 0;
   private perforanteArmed: boolean = false;
   private slowZone: { x: number; y: number; radius: number; endTime: number } | null = null;
+  private poisonTickAt = new Map<BotAI, number>();
+  private mouseAimActive = false;
 
   public gameConfig: any = null;
   public botAIs: BotAI[] = [];
@@ -333,24 +340,57 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
     canvas.height = 720;
 
     const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras?.state as { config: any, bots: any[] };
+    const routeState = navigation?.extras?.state ?? (typeof history !== 'undefined' ? history.state : null);
+    // El hangar envía config, bots y equipamientoJugador mediante Router state.
+    // history.state se usa como respaldo cuando Angular ya completó la navegación.
+    const state = routeState as {
+      config?: any;
+      bots?: any[];
+      equipamientoJugador?: {
+        tanque?: any;
+        arma?: any;
+      };
+    } | null;
 
     if (state) {
-      this.gameConfig = state.config;
+      this.gameConfig = state.config ?? state;
       this.totalRondas = Number(this.gameConfig?.rondas) || 5;
-      this.rawBotsConfig = state.bots || [];
+      this.rawBotsConfig = Array.isArray(state.bots) ? state.bots : [];
     }
 
-    const tankData = TANQUES_JUEGO[0];
-    this.playerTank = new Tank(180, 360, tankData, true);
-    this.ability = ABILIDADES[tankData.tanque_id];
+    // Prioridad: objeto de equipamiento enviado por OfflineComponent;
+    // respaldo: identificadores de config para mantener compatibilidad.
+    const tanqueRecibido = this.extraerIdentificador(
+      state?.equipamientoJugador?.tanque,
+      ['tanque_id', 'tanqueId', 'TanqueId', 'tankId', 'id', 'Id', 'nombre', 'Nombre']
+    );
+    const armaRecibida = this.extraerIdentificador(
+      state?.equipamientoJugador?.arma,
+      ['arma_id', 'armaId', 'ArmaId', 'weaponId', 'id', 'Id', 'nombre', 'Nombre']
+    );
+
+    const selectedTankId = this.normalizarTankId(
+      tanqueRecibido ?? this.gameConfig?.tanqueSeleccionado ?? this.gameConfig?.tankId
+    );
+    const tankData = TANQUES_JUEGO.find(t => t.tanque_id === selectedTankId) ?? TANQUES_JUEGO[0];
+    this.playerTank = new Tank(120, 120, tankData, true);
+    this.ability = ABILIDADES[tankData.tanque_id] ?? ABILIDADES['TANK-01'];
 
     // Inicializar el mapa de juego de forma segura
     const mapaId = this.normalizarMapaId(this.gameConfig?.mapaSeleccionado);
     this.gameMap = new GameMap(mapaId);
 
     this.initNewRound();
-    this.setWeapon('WEAP-03');
+    this.setWeapon(this.normalizarArmaId(
+      armaRecibida ?? this.gameConfig?.armaSeleccionada ?? this.gameConfig?.weaponId
+    ));
+
+    console.log('[Game Offline] Equipamiento aplicado:', {
+      tanque: tankData.tanque_id,
+      arma: this.currentWeaponId,
+      config: this.gameConfig
+    });
+
     this.startGameLoop();
   }
 
@@ -378,13 +418,21 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
 
   private initNewRound() {
     this.resetAbility();
+    this.bullets = [];
+    this.itemManager.activeItems = [];
+    this.poisonTickAt.clear();
+    this.activeEffect = null;
+    this.effectTimeLeft = 0;
+    if (this.effectTimerInterval) clearInterval(this.effectTimerInterval);
+    this.effectTimerInterval = null;
 
-    this.playerTank.x = 180;
-    this.playerTank.y = 360;
+    const playerSpawn = this.getSafeSpawnPosition(1280, 720, 'left');
+    this.playerTank.x = playerSpawn.x;
+    this.playerTank.y = playerSpawn.y;
     this.playerTank.currentHp = this.playerTank.tankData.vida_base;
 
     this.botAIs = this.rawBotsConfig.map((b, index) => {
-      const spawnPos = this.getSafeSpawnPosition(1280, 720);
+      const spawnPos = this.getSafeSpawnPosition(1280, 720, 'right');
       const enemyTank = new Tank(spawnPos.x, spawnPos.y, b.tanque, false);
       enemyTank.currentHp = b.tanque.vida_base;
       return new BotAI(enemyTank, b.dificultad, b.arma.arma_id);
@@ -400,24 +448,77 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
     }, 1000);
   }
 
-  private getSafeSpawnPosition(canvasWidth: number, canvasHeight: number): { x: number, y: number } {
+  private getSafeSpawnPosition(canvasWidth: number, canvasHeight: number, side: 'left' | 'right' = 'right'): { x: number, y: number } {
     const rows = this.gameMap.currentMap.matrizColisiones.length;
     const cols = this.gameMap.currentMap.matrizColisiones[0].length;
     const tileW = canvasWidth / cols;
     const tileH = canvasHeight / rows;
-
-    for (let i = 0; i < 50; i++) {
-      const x = 700 + Math.random() * 500;
-      const y = 100 + Math.random() * 520;
-
-      const r = Math.floor(y / tileH);
-      const c = Math.floor(x / tileW);
-
+    const minX = side === 'left' ? 50 : 660;
+    const maxX = side === 'left' ? 600 : 1220;
+    for (let i = 0; i < 250; i++) {
+      const x = minX + Math.random() * (maxX - minX);
+      const y = 60 + Math.random() * (canvasHeight - 120);
+      const r = Math.floor(y / tileH), c = Math.floor(x / tileW);
       if (r >= 0 && r < rows && c >= 0 && c < cols && !this.gameMap.isWall(r, c)) {
-        return { x, y };
+        // La caja del tanque es más grande que una celda: solo acepta centros con margen.
+        const margin = 20;
+        const open = !this.gameMap.isWall(Math.floor((y - margin) / tileH), Math.floor((x - margin) / tileW))
+          && !this.gameMap.isWall(Math.floor((y - margin) / tileH), Math.floor((x + margin) / tileW))
+          && !this.gameMap.isWall(Math.floor((y + margin) / tileH), Math.floor((x - margin) / tileW))
+          && !this.gameMap.isWall(Math.floor((y + margin) / tileH), Math.floor((x + margin) / tileW));
+        if (open) return { x, y };
       }
     }
-    return { x: 950, y: 360 };
+    return side === 'left' ? { x: 100, y: 100 } : { x: 1180, y: 620 };
+  }
+
+  /** Extrae un identificador si se recibe el objeto completo del catálogo. */
+  private extraerIdentificador(valor: any, propiedades: string[]): unknown {
+    if (valor === null || valor === undefined) return undefined;
+    if (typeof valor !== 'object') return valor;
+
+    for (const propiedad of propiedades) {
+      const encontrado = valor[propiedad];
+      if (encontrado !== null && encontrado !== undefined && String(encontrado).trim() !== '') {
+        return encontrado;
+      }
+    }
+
+    return undefined;
+  }
+
+  private normalizarTankId(valor: unknown): string {
+    const raw = String(valor ?? '').trim().toUpperCase();
+
+    const exacto = TANQUES_JUEGO.find(t =>
+      t.tanque_id.toUpperCase() === raw || t.nombre.toUpperCase() === raw
+    );
+    if (exacto) return exacto.tanque_id;
+
+    const n = Number(raw.replace(/[^0-9]/g, ''));
+    if (Number.isInteger(n) && n >= 1 && n <= TANQUES_JUEGO.length) {
+      return TANQUES_JUEGO[n - 1].tanque_id;
+    }
+
+    console.warn('[Game Offline] Tanque no reconocido; se usará el primero:', valor);
+    return TANQUES_JUEGO[0].tanque_id;
+  }
+
+  private normalizarArmaId(valor: unknown): string {
+    const raw = String(valor ?? '').trim().toUpperCase();
+
+    const exacta = ARMAS_JUEGO.find(a =>
+      a.arma_id.toUpperCase() === raw || a.nombre.toUpperCase() === raw
+    );
+    if (exacta) return exacta.arma_id;
+
+    const n = Number(raw.replace(/[^0-9]/g, ''));
+    if (Number.isInteger(n) && n >= 1 && n <= ARMAS_JUEGO.length) {
+      return ARMAS_JUEGO[n - 1].arma_id;
+    }
+
+    console.warn('[Game Offline] Arma no reconocida; se usará la primera:', valor);
+    return ARMAS_JUEGO[0].arma_id;
   }
 
   private normalizarMapaId(valor: string | undefined): string {
@@ -505,6 +606,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
     this.abilityProgress = 100;
     this.perforanteArmed = false;
     this.slowZone = null;
+    this.poisonTickAt.clear();
   }
 
   private updateAbility(now: number) {
@@ -639,15 +741,49 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
     }
   }
 
+  onCanvasPointerMove(event: PointerEvent) {
+    this.mouseAimActive = true;
+    const point = this.pointerToWorld(event);
+    this.playerTank.turretAngle = Math.atan2(point.y - this.playerTank.y, point.x - this.playerTank.x);
+  }
+
+  onCanvasPointerDown(event: PointerEvent) {
+    if ((event.target as HTMLElement).closest('.fixed-joystick-zone,.ability-button-zone,button')) return;
+    event.preventDefault();
+    this.mouseAimActive = true;
+    const point = this.pointerToWorld(event);
+    this.playerTank.turretAngle = Math.atan2(point.y - this.playerTank.y, point.x - this.playerTank.x);
+    this.triggerShot();
+  }
+
+  private pointerToWorld(event: PointerEvent): { x: number; y: number } {
+    const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+    return {
+      x: Math.max(0, Math.min(1280, (event.clientX - rect.left) * 1280 / rect.width)),
+      y: Math.max(0, Math.min(720, (event.clientY - rect.top) * 720 / rect.height))
+    };
+  }
+
+  public salirPartida(): void {
+    if (this.roundTimerInterval) clearInterval(this.roundTimerInterval);
+    if (this.effectTimerInterval) clearInterval(this.effectTimerInterval);
+    cancelAnimationFrame(this.animationFrameId);
+    void this.router.navigateByUrl('/home', { replaceUrl: true });
+  }
+
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-    this.keys[event.key.toLowerCase()] = true;
-    if (event.key === 'e' || event.key === ' ') {
-      this.useSpecialAbility();
-    }
+    const key = event.key.toLowerCase();
+    this.keys[key] = true;
+    if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) event.preventDefault();
+    if (!event.repeat && key === 'e') this.useSpecialAbility();
+    if (!event.repeat && (key === ' ' || key === 'enter')) this.triggerShot();
   }
   @HostListener('window:keyup', ['$event'])
   handleKeyUp(event: KeyboardEvent) { this.keys[event.key.toLowerCase()] = false; }
+
+  @HostListener('window:blur')
+  handleWindowBlur() { this.keys = {}; this.leftJoystick.vectorX = this.leftJoystick.vectorY = 0; this.rightJoystick.vectorX = this.rightJoystick.vectorY = 0; }
 
   onJoystickStart(event: TouchEvent, side: 'left' | 'right') {
     event.preventDefault();
@@ -741,6 +877,8 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
       dx = this.leftJoystick.vectorX * speedMultiplier;
       dy = this.leftJoystick.vectorY * speedMultiplier;
     }
+    const inputLength = Math.hypot(dx, dy);
+    if (!this.isDashing && inputLength > 1) { dx /= inputLength; dy /= inputLength; }
 
     if (this.isDashing) {
       this.playerTank.move(this.dashDirX * this.DASH_SPEED, this.dashDirY * this.DASH_SPEED, this.gameMap, 1280, 720);
@@ -753,10 +891,15 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
     }
 
     this.botAIs.forEach(bot => {
-      const inside = this.slowZone
+      const inside = this.slowZone && now < this.slowZone.endTime
         ? Math.hypot(bot.tank.x - this.slowZone.x, bot.tank.y - this.slowZone.y) < this.slowZone.radius
         : false;
       bot.speedMultiplier = inside ? this.SLOW_FACTOR : 1;
+      // La zona Juggernaut aplica veneno periódico además de reducir la velocidad.
+      if (inside && now - (this.poisonTickAt.get(bot) ?? 0) >= 950) {
+        this.poisonTickAt.set(bot, now);
+        bot.tank.currentHp = Math.max(0, bot.tank.currentHp - 8);
+      }
     });
 
     this.botAIs.forEach(bot => {
@@ -772,7 +915,12 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
       if ((bullet as any).isPlayer) {
         this.botAIs.forEach(bot => {
           const dist = Math.hypot(bullet.x - bot.tank.x, bullet.y - bot.tank.y);
-          if (dist < 35) { bullet.active = false; bot.tank.currentHp -= 34; }
+          if (dist < 35) {
+            bullet.active = false;
+            const baseDamage = bullet.isPiercing ? 50 : 34;
+            const damageMultiplier = this.activeEffect === 'SOBRECARGA' ? 1.5 : 1;
+            bot.tank.currentHp = Math.max(0, bot.tank.currentHp - Math.round(baseDamage * damageMultiplier));
+          }
         });
       } else if (!this.isDashing) {
         const dist = Math.hypot(bullet.x - this.playerTank.x, bullet.y - this.playerTank.y);
@@ -842,7 +990,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
 
     this.bullets.forEach(b => b.draw(this.ctx));
 
-    if (this.rightJoystick.vectorX !== 0 || this.rightJoystick.vectorY !== 0) {
+    if (this.mouseAimActive || this.rightJoystick.vectorX !== 0 || this.rightJoystick.vectorY !== 0) {
       AimTrajectory.draw(
         this.ctx, this.playerTank.x, this.playerTank.y,
         this.playerTank.turretAngle, this.currentWeaponId,

@@ -65,7 +65,15 @@ export class ItemManager {
     const posY = (randomCell.r + 0.5) * tileH;
 
     const randomType = this.possibleTypes[Math.floor(Math.random() * this.possibleTypes.length)];
-    const imagePath = `assets/imgs/powers/${randomType}.png`;
+    const imagePaths: Record<string, string> = {
+      botiquin: 'assets/imgs/powers/botiquin.png',
+      sobrecarga: 'assets/imgs/powers/sobrecarga.png',
+      escudo: 'assets/imgs/powers/escudo.png',
+      aceite: 'assets/imgs/powers/aceite.png',
+      oruga: 'assets/imgs/powers/oruga.png',
+      falla: 'assets/imgs/powers/falla.png'
+    };
+    const imagePath = imagePaths[randomType] ?? 'assets/imgs/powerups/heal.png';
 
     const img = new Image();
     img.src = imagePath;
@@ -80,9 +88,8 @@ export class ItemManager {
       loaded: false
     };
 
-    img.onload = () => {
-      newItem.loaded = true;
-    };
+    img.onload = () => { newItem.loaded = true; };
+    img.onerror = () => { newItem.loaded = false; newItem.imageElement = undefined; };
 
     this.activeItems.push(newItem);
   }
