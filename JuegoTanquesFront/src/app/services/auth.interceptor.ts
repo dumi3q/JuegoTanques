@@ -1,24 +1,60 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(AuthService);
-  const token = authService.obtenerToken();
+  const auth = inject(AuthService);
+  const router = inject(Router);
 
-  // 🔍 VAMOS A VER QUÉ DEVUELVE EXACTAMENTE AQUÍ
-  console.log('🔍 [INTERCEPTOR] URL:', req.url);
-  console.log('🔍 [INTERCEPTOR] Token detectado:', token ? 'SÍ EXISTE 🟢' : 'ES NULL (Se barrió) ❌');
+  const baseUrl = environment.baseUrl.replace(/\/+$/, '');
+  const esNuestraApi =
+    req.url === baseUrl || req.url.startsWith(baseUrl + '/');
+
+  const token = esNuestraApi ? auth.obtenerToken() : null;
+
+  const headers: Record<string, string> = {};
 
   if (token) {
-    // Clona la petición y le agrega la cabecera de autorización con el Bearer token
-    const cloned = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return next(cloned);
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
-  return next(req);
+  if (
+    req.url.startsWith(
+      'https://hydrant-atonable-broiling.ngrok-free.dev/'
+    )
+  ) {
+    headers['ngrok-skip-browser-warning'] = '1';
+  }
+
+  const peticion = Object.keys(headers).length
+    ? req.clone({ setHeaders: headers })
+    : req;
+
+  console.log('🌐 [API]', req.method, req.url);
+
+  return next(peticion).pipe(
+    catchError((error: HttpErrorResponse) => {
+      console.error('❌ [API ERROR]', {
+        url: req.url,
+        status: error.status,
+        message: error.message,
+        error: error.error
+      });
+
+      if (
+        error.status === 401 &&
+        esNuestraApi &&
+        !req.url.toLowerCase().includes('/auth/')
+      ) {
+        auth.cerrarSesion();
+        router.navigate(['/login']);
+      }
+
+      return throwError(() => error);
+    })
+  );
 };

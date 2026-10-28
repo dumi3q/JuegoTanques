@@ -16,7 +16,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSignalR();
-
 builder.Services.AddDbContext<JuegoTanquesContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -35,25 +34,24 @@ builder.Services.AddSingleton<SalasServicio>();
 builder.Services.AddScoped<AuthServicio>();
 builder.Services.AddScoped<ProgresoServicio>();
 builder.Services.AddMemoryCache();
+builder.Services.AddScoped<ICorreoServicio, CorreoServicio>();
+builder.Services.AddSingleton<JwtServicio>();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermitirIonic", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:8000", "https://localhost:8000",
-                "http://localhost:8100", "https://localhost:8100",
-                "http://localhost:8101", "https://localhost:8101"
-              )
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+            "https://localhost", "http://localhost", "capacitor://localhost",
+            "http://localhost:8000", "https://localhost:8000",
+            "http://localhost:8100", "https://localhost:8100",
+            "http://localhost:8101", "https://localhost:8101"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
-
-builder.Services.AddScoped<ICorreoServicio, CorreoServicio>();
-builder.Services.AddSingleton<JwtServicio>();
-builder.Services.AddScoped<AuthServicio>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opciones =>
@@ -69,29 +67,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Clave"]!)),
             ValidateLifetime = true
         };
-
         opciones.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
-                // 1. Revisar el query string (método estándar para WebSockets)
-                var accessToken = context.Request.Query["access_token"];
-
-                // 2. Si viene vacío, revisar la cabecera Authorization tradicional
-                if (string.IsNullOrEmpty(accessToken))
-                {
-                    var authHeader = context.Request.Headers["Authorization"].ToString();
-                    if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                    {
-                        accessToken = authHeader["Bearer ".Length..].Trim();
-                    }
-                }
-
-                // 3. SOLUCIÓN DEFINITIVA: Si es una petición hacia el Hub de salas, inyectamos el token al contexto
                 var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/salasHub"))
+                if (path.StartsWithSegments("/salasHub"))
                 {
-                    context.Token = accessToken;
+                    var accessToken = context.Request.Query["access_token"].ToString();
+                    if (!string.IsNullOrWhiteSpace(accessToken))
+                        context.Token = accessToken;
                 }
                 return Task.CompletedTask;
             }
@@ -100,20 +85,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
+if (app.Environment.IsDevelopment()) app.MapOpenApi();
+app.UseRouting();
+// ngrok provides public HTTPS; keep local HTTP without redirect for this demo.
+// For a permanent deployment configure forwarded headers and HTTPS properly.
 app.UseCors("PermitirIonic");
-app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/api/health", () => Results.Ok(new { ok = true, servicio = "JuegoTanques.API" }));
 app.MapControllers();
-// 🟢 Mapeamos el Hub permitiendo que la negociación inicial pase sin bloquearse con 401
 app.MapHub<SalasHub>("/salasHub");
-
 app.Run();

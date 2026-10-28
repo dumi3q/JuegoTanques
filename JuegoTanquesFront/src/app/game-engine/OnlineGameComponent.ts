@@ -113,13 +113,13 @@ interface OnlinePowerUp {
             </div>
           </div>
         </div>
-
-        <div class="pc-controls" aria-label="Controles para computadora">
-          <strong>PC</strong> WASD mover · Ratón apuntar · Clic disparar · E habilidad · Espacio disparar · Shift impulso
-        </div>
         <button class="leave-button" type="button" (click)="salirPartida()">SALIR</button>
 
         @if (message) { <div class="online-message">{{ message }}</div> }
+
+        @if (roundNotice && !partidaTerminada) {
+          <div class="round-result-overlay" role="status"><div class="round-result-card">{{ roundNotice }}</div></div>
+        }
 
         @if (partidaTerminada) {
           <div class="result-overlay">
@@ -194,6 +194,8 @@ interface OnlinePowerUp {
     .online-message { position:absolute; top:105px; left:50%; transform:translateX(-50%); z-index:30; color:#fff; background:rgba(0,0,0,.82); border:1px solid rgba(255,255,255,.24); border-radius:10px; padding:8px 12px; font:600 12px system-ui,sans-serif; text-align:center; max-width:80vw; pointer-events:none; }
     .pc-controls { position:absolute; top:68px; left:12px; max-width:min(390px,42vw); z-index:8; color:rgba(255,255,255,.82); background:rgba(0,0,0,.58); border:1px solid rgba(255,255,255,.18); border-radius:8px; padding:7px 10px; font:500 10px/1.5 system-ui,sans-serif; pointer-events:none; }
     .pc-controls strong { color:#00d2ff; margin-right:6px; }
+    .round-result-overlay {position:absolute;inset:0;z-index:38;display:flex;align-items:center;justify-content:center;pointer-events:none;background:rgba(0,0,0,.28)}
+    .round-result-card {padding:14px 20px;max-width:85%;border:2px solid #00d2ff;border-radius:14px;background:rgba(5,15,30,.93);color:#fff;font:800 clamp(16px,3vw,24px)/1.3 system-ui;text-align:center}
     .result-overlay { position:absolute; inset:0; z-index:40; background:rgba(0,0,0,.82); display:flex; align-items:center; justify-content:center; padding:18px; overflow:auto; }
     .result-card { width:min(600px,96vw); max-height:90%; overflow:auto; background:#111827; border:1px solid #00d2ff; box-shadow:0 0 36px rgba(0,210,255,.15); border-radius:16px; color:#fff; padding:18px; }
     .result-card h2 { text-align:center; color:#00d2ff; margin:4px 0 12px; font-size:19px; }
@@ -203,6 +205,109 @@ interface OnlinePowerUp {
     .result-card button { margin-top:16px; width:100%; border:0; border-radius:10px; background:#00b8de; color:#001018; padding:12px; font-weight:800; cursor:pointer; }
     @media (max-width:700px) { .pc-controls { display:none; } }
     @media (max-height:500px) { .fixed-joystick-zone { bottom:8px; } .joystick-base { width:82px;height:82px; } .online-hud { top:5px; } .online-ammo { bottom:9px; } .ability-button-zone { bottom:115px; right:28px; } .online-effect { top:58px; } }
+
+    /* === MOBILE FIRST: landscape, safe areas y HUD sin obstáculos === */
+    :host { display:block; width:100%; height:100%; overflow:hidden; }
+    .game-container, .online-game-content { --background:#05070b; --overflow:hidden; }
+    .canvas-wrapper, .online-game-root {
+      width:100%; height:100%; height:100dvh; max-width:100%; max-height:100dvh;
+      overflow:hidden; position:relative; touch-action:none;
+      -webkit-user-select:none; user-select:none;
+    }
+    canvas { width:100%; height:100%; display:block; object-fit:contain; touch-action:none; }
+    .offline-controls, .pc-controls, .joystick-label { display:none !important; }
+    .top-hud, .online-hud {
+      position:absolute; top:max(5px, env(safe-area-inset-top)); left:50%;
+      transform:translateX(-50%); width:auto; max-width:65%;
+      gap:4px; margin:0; flex-wrap:nowrap; pointer-events:none;
+    }
+    .hud-box, .hud-pill {
+      padding:5px 8px; border-width:1px; border-radius:9px;
+      background:rgba(5,10,19,.8); white-space:nowrap;
+      font-size:clamp(9px,1.7vw,12px); line-height:1.15;
+    }
+    .hud-title, .hud-timer { font-size:clamp(9px,1.7vw,12px); }
+    .offline-exit, .leave-button {
+      position:absolute; z-index:35; top:max(6px, env(safe-area-inset-top));
+      right:max(8px, env(safe-area-inset-right));
+      padding:7px 10px; border-radius:10px; font-size:11px; line-height:1.1;
+    }
+    .fixed-joystick-zone {
+      position:absolute; bottom:max(9px, env(safe-area-inset-bottom));
+      width:clamp(96px,19vh,132px); height:clamp(96px,19vh,132px);
+      display:flex; align-items:center; justify-content:center; z-index:26;
+      touch-action:none; -webkit-user-select:none; user-select:none;
+    }
+    .left-joystick { left:max(12px, env(safe-area-inset-left)); }
+    .right-joystick { right:max(12px, env(safe-area-inset-right)); }
+    .joystick-base { width:82%; height:82%; box-sizing:border-box; border-radius:50%; }
+    .joystick-stick { width:44%; height:44%; box-sizing:border-box; border-radius:50%; }
+    .ability-button-zone {
+      position:absolute; z-index:28; width:clamp(56px,12vh,75px);
+      height:clamp(56px,12vh,75px);
+      right:max(32px, calc(env(safe-area-inset-right) + 26px));
+      bottom:calc(max(9px, env(safe-area-inset-bottom)) + clamp(96px,19vh,132px) + 3px);
+      touch-action:none;
+    }
+    .ability-icon { font-size:clamp(19px,4vh,25px); }
+    .ability-text { font-size:9px; }
+    .ammo-container, .online-ammo {
+      position:absolute; left:50%; right:auto; bottom:max(10px, env(safe-area-inset-bottom));
+      transform:translateX(-50%); display:flex; justify-content:center;
+      gap:5px; z-index:24; pointer-events:none;
+    }
+    .ammo-pill { width:clamp(9px,1.8vw,14px); height:clamp(19px,4vh,27px); }
+    .active-effect-banner, .online-effect {
+      position:absolute; top:calc(max(5px, env(safe-area-inset-top)) + 38px);
+      left:50%; transform:translateX(-50%); max-width:65%;
+      padding:4px 9px; border-width:1px; border-radius:8px;
+      font-size:11px; white-space:nowrap; pointer-events:none;
+    }
+    .online-message { top:22%; max-width:64%; font-size:11px; }
+    .result-overlay { padding:max(8px, env(safe-area-inset-top)) 12px; }
+    .result-card { max-height:94%; width:min(540px,96%); box-sizing:border-box; }
+    @media (max-height:420px) {
+      .fixed-joystick-zone { width:94px; height:94px; bottom:max(5px, env(safe-area-inset-bottom)); }
+      .ability-button-zone { width:52px; height:52px; bottom:105px; right:max(24px, env(safe-area-inset-right)); }
+      .hud-box, .hud-pill { padding:3px 6px; }
+      .online-hud { max-width:68%; }
+    }
+
+    /* AJUSTE V2: cámara equilibrada y controles grandes al jugar en horizontal */
+    .fixed-joystick-zone {
+      width: clamp(128px, 23vh, 164px) !important;
+      height: clamp(128px, 23vh, 164px) !important;
+      bottom: max(14px, env(safe-area-inset-bottom)) !important;
+      z-index: 26;
+    }
+    .left-joystick { left: max(20px, env(safe-area-inset-left)) !important; }
+    .right-joystick { right: max(20px, env(safe-area-inset-right)) !important; }
+    .fixed-joystick-zone .joystick-base {
+      width: 84% !important;
+      height: 84% !important;
+      min-width: 0;
+      min-height: 0;
+      border: 2px solid rgba(255,255,255,.52);
+      background: rgba(24,37,54,.35);
+    }
+    .fixed-joystick-zone .joystick-stick {
+      width: 45% !important;
+      height: 45% !important;
+      background: rgba(255,200,70,.48);
+      border: 2px solid rgba(255,230,170,.75);
+    }
+    .ability-button-zone {
+      width: clamp(66px, 13vh, 82px) !important;
+      height: clamp(66px, 13vh, 82px) !important;
+      right: max(44px, calc(env(safe-area-inset-right) + 44px)) !important;
+      bottom: calc(max(14px, env(safe-area-inset-bottom)) + clamp(128px, 23vh, 164px) + 7px) !important;
+    }
+    @media (max-height: 430px) {
+      .fixed-joystick-zone { width: 126px !important; height: 126px !important; bottom: 8px !important; }
+      .left-joystick { left: max(10px, env(safe-area-inset-left)) !important; }
+      .right-joystick { right: max(10px, env(safe-area-inset-right)) !important; }
+      .ability-button-zone { width: 64px !important; height: 64px !important; bottom: 139px !important; right: max(30px, env(safe-area-inset-right)) !important; }
+    }
   `]
 })
 export class OnlineGameComponent implements OnInit, OnDestroy {
@@ -265,6 +370,10 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
   public rightStick = { x: 0, y: 0, dx: 0, dy: 0 };
   public message = '';
   public partidaTerminada = false;
+  public roundNotice = '';
+  private roundNoticeTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastRoundNoticeKey = '';
+  private finalProcessed = false;
   public resultados: any[] = [];
   public get leftStickTransform(): string { return `translate(${this.leftStick.x}px, ${this.leftStick.y}px)`; }
   public get rightStickTransform(): string { return `translate(${this.rightStick.x}px, ${this.rightStick.y}px)`; }
@@ -321,6 +430,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     if (this.powerSpawnTimer) clearInterval(this.powerSpawnTimer);
     if (this.roundTimer) clearInterval(this.roundTimer);
     if (this.effectTimer) clearInterval(this.effectTimer);
+    if (this.roundNoticeTimer) clearTimeout(this.roundNoticeTimer);
     try { void ScreenOrientation.lock({ orientation: 'portrait' }); } catch { /* no-op */ }
   }
 
@@ -370,6 +480,9 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     this.subs.push(this.signalr.rondaIniciada$.subscribe(evt => {
       if (!evt) return;
       this.currentRound = Number(evt.ronda ?? evt.Ronda ?? this.currentRound);
+      this.roundNotice = '';
+      this.lastRoundNoticeKey = '';
+      if (this.roundNoticeTimer) clearTimeout(this.roundNoticeTimer);
       this.roundTimeLeft = Number(evt.segundos ?? evt.Segundos ?? 90);
       this.rondaActiva = true;
       this.partidaTerminada = false;
@@ -405,7 +518,21 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
       if (!evt) return;
       this.rondaActiva = false;
       const esFinal = Boolean(evt.esFinal ?? evt.EsFinal);
-      this.showMessageFor(esFinal ? 'Ronda finalizada. Calculando resultados…' : 'Ronda finalizada. Próxima ronda en unos segundos…', 2200);
+      const ronda = Number(evt.ronda ?? evt.Ronda ?? this.currentRound);
+      const key = `${ronda}-${esFinal}`;
+      if (this.lastRoundNoticeKey === key) return;
+      this.lastRoundNoticeKey = key;
+      const ganadorId = Number(evt.ganadorUsuarioId ?? evt.GanadorUsuarioId ?? 0);
+      const equipoGanador = evt.equipoGanadorId ?? evt.EquipoGanadorId ?? evt.equipoGanador ?? evt.EquipoGanador;
+      const ganadorNombre = evt.ganadorNombre ?? evt.GanadorNombre ?? evt.nombreGanador ?? evt.NombreGanador;
+      let descripcion = 'Ronda terminada';
+      if (ganadorId > 0) descripcion = ganadorId === this.myId ? '¡Ganaste la ronda!' : `Ganó ${ganadorNombre || 'otro jugador'}`;
+      else if (equipoGanador !== null && equipoGanador !== undefined)
+        descripcion = Number(equipoGanador) === this.myPlayer?.equipoId ? '¡Tu equipo ganó la ronda!' : 'Ganó el equipo rival';
+      else if (ganadorNombre) descripcion = `Ganó ${ganadorNombre}`;
+      this.roundNotice = `RONDA ${ronda}: ${descripcion}`;
+      if (this.roundNoticeTimer) clearTimeout(this.roundNoticeTimer);
+      this.roundNoticeTimer = setTimeout(() => this.roundNotice = '', 2600);
     }));
 
     this.subs.push(this.signalr.jugadorImpactado$.subscribe(evt => {
@@ -463,8 +590,11 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     }));
 
     this.subs.push(this.signalr.partidaTerminada$.subscribe(evt => {
-      if (!evt) return;
+      if (!evt || this.finalProcessed) return;
+      this.finalProcessed = true;
       this.rondaActiva = false;
+      this.roundNotice = '';
+      if (this.roundNoticeTimer) clearTimeout(this.roundNoticeTimer);
       this.partidaTerminada = true;
       this.resultados = evt.posiciones ?? evt.Posiciones ?? [];
       this.bullets = [];
@@ -756,6 +886,9 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     const x = Number(msg.x ?? msg.X), y = Number(msg.y ?? msg.Y), angle = Number(msg.angulo ?? msg.Angulo);
     const weaponId = this.normalizeWeaponId(msg.armaId ?? msg.ArmaId);
     const bullet = new Bullet(x, y, angle, weaponId, Boolean(msg.perforante ?? msg.Perforante));
+    (bullet as any).__origenX = x;
+    (bullet as any).__origenY = y;
+    (bullet as any).__escopeta = weaponId === 'WEAP-01';
     this.bullets.push({ id, ownerId, teamId: owner.equipoId, bullet, hitRequested: false });
   }
 
@@ -766,23 +899,71 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     this.currentAmmo--;
     this.updateAmmoHud();
     this.lastAmmoShot = Date.now();
+
+    // No permitir disparos si la partida no está activa
+    if (
+      !this.rondaActiva ||
+      this.partidaTerminada ||
+      !this.myPlayer ||
+      this.myPlayer.eliminado ||
+      this.myPlayer.tank.currentHp <= 0
+    ) {
+      return;
+    }
+
     const x = this.playerTank.x + Math.cos(shootAngle) * 40;
     const y = this.playerTank.y + Math.sin(shootAngle) * 40;
-    const offsets = this.myPlayer.weaponId === 'WEAP-01' ? [-0.2, 0, 0.2] : [0];
+
+    const offsets =
+      this.myPlayer.weaponId === 'WEAP-01'
+        ? [-0.2, 0, 0.2]
+        : [0];
+
     const piercing = this.perforanteArmed;
+
     for (const offset of offsets) {
       const id = this.newId();
       const a = shootAngle + offset;
-      const bullet = new Bullet(x, y, a, this.myPlayer.weaponId, piercing);
-      this.bullets.push({ id, ownerId: this.myId, teamId: this.myPlayer.equipoId, bullet, hitRequested: false });
+
+      const bullet = new Bullet(
+        x,
+        y,
+        a,
+        this.myPlayer.weaponId,
+        piercing
+      );
+
+      (bullet as any).__origenX = x;
+      (bullet as any).__origenY = y;
+      (bullet as any).__escopeta = this.myPlayer.weaponId === 'WEAP-01';
+      this.bullets.push({
+        id,
+        ownerId: this.myId,
+        teamId: this.myPlayer.equipoId,
+        bullet,
+        hitRequested: false
+      });
+
       void this.signalr.enviarDisparo({
-        balaId: id, usuarioId: this.myId, x, y, angulo: a,
-        armaId: this.myPlayer.weaponId, perforante: piercing
+        balaId: id,
+        usuarioId: this.myId,
+        x,
+        y,
+        angulo: a,
+        armaId: this.myPlayer.weaponId,
+        perforante: piercing
       }).catch(error => {
+        // El servidor rechazó el disparo:
+        // quitamos la bala local para evitar desincronización.
         this.bullets = this.bullets.filter(b => b.id !== id);
-        console.warn('No se pudo sincronizar el disparo:', error);
+
+        console.warn(
+          '[OnlineGame] Disparo rechazado:',
+          { balaId: id, error }
+        );
       });
     }
+
     if (piercing) this.startAbilityCooldown();
   }
 
@@ -869,13 +1050,25 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     this.showMessageFor(`Recogiste: ${tipo.toUpperCase()}`, 1100);
   }
 
+  // Sprites más legibles sin recortar el mapa ni alterar la sincronización.
+  private drawMobileTank(tank: Tank, effect: string | null, color: string): void {
+    const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+    const factor = Math.min(rect.width, rect.height) <= 650 ? 1.16 : 1;
+    this.ctx.save();
+    this.ctx.translate(tank.x, tank.y);
+    this.ctx.scale(factor, factor);
+    this.ctx.translate(-tank.x, -tank.y);
+    tank.draw(this.ctx, effect, color);
+    this.ctx.restore();
+  }
+
   private gameLoop = (): void => {
     if (!this.ctx || !this.gameMap) return;
     // Renderizar siempre el mapa y los jugadores remotos aunque el ID local aún no haya coincidido.
     // Antes, exigir playerTank aquí detenía por completo el render y dejaba el canvas negro.
     this.updateAbilityState();
     this.updateGame();
-    this.ctx.clearRect(0, 0, 1280, 720);
+    this.beginCameraFrame();
     this.gameMap.draw(this.ctx, 1280, 720);
 
     for (const item of this.powerUps) this.drawPowerUp(item);
@@ -894,7 +1087,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
       }
       if (p.eliminado && p.tank.currentHp <= 0) continue;
       const color = isMe || (this.modoEquipos && p.equipoId === this.myPlayer?.equipoId) ? '#00d2ff' : '#ff2222';
-      p.tank.draw(this.ctx, isMe ? this.activeEffect : null, color);
+      this.drawMobileTank(p.tank, isMe ? this.activeEffect : null, color);
       this.drawHealthBar(p.tank, p.tank.tankData.vida_base);
       this.ctx.save();
       this.ctx.font = '600 10px system-ui,sans-serif';
@@ -916,6 +1109,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     }
 
     for (const wrapper of this.bullets) wrapper.bullet.draw(this.ctx);
+    this.ctx.restore(); // restaura la transformación del mundo tras dibujar todo
     this.frameId = requestAnimationFrame(this.gameLoop);
   };
 
@@ -985,6 +1179,11 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
       const bullet = wrapper.bullet;
       if (!bullet.active) continue;
       bullet.update(this.gameMap, 1280, 720);
+      if ((bullet as any).__escopeta &&
+        Math.hypot(bullet.x - (bullet as any).__origenX,
+          bullet.y - (bullet as any).__origenY) >= 260) {
+        bullet.active = false;
+      }
       if (!bullet.active || wrapper.ownerId === this.myId || wrapper.hitRequested) continue;
 
       const owner = this.players.get(wrapper.ownerId);
@@ -1008,14 +1207,14 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
 
   private powerUpImagePath(tipo: string): string {
     const paths: Record<string, string> = {
-      botiquin: 'assets/imgs/powerups/heal.png',
-      sobrecarga: 'assets/imgs/powerups/buff.png',
-      escudo: 'assets/imgs/powerups/shield.png',
-      aceite: 'assets/imgs/nerfs/oil.png',
-      oruga: 'assets/imgs/nerfs/track.png',
-      falla: 'assets/imgs/nerfs/jam.png'
+      botiquin: 'assets/imgs/powers/botiquin.png',
+      sobrecarga: 'assets/imgs/powers/sobrecarga.png',
+      escudo: 'assets/imgs/powers/escudo.png',
+      aceite: 'assets/imgs/powers/aceite.png',
+      oruga: 'assets/imgs/powers/oruga.png',
+      falla: 'assets/imgs/powers/falla.png'
     };
-    return paths[tipo.toLowerCase()] ?? 'assets/imgs/powerups/heal.png';
+    return paths[tipo.toLowerCase()] ?? 'assets/imgs/powers/botiquin.png';
   }
 
   private getPowerUpImage(tipo: string): HTMLImageElement {
@@ -1067,6 +1266,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
   }
 
   onCanvasPointerMove(event: PointerEvent): void {
+    if (event.pointerType === 'touch') return;
     this.mouseAimActive = true;
     if (!this.playerTank || this.stickPointer.right !== null) return;
     const point = this.pointerToWorld(event);
@@ -1074,6 +1274,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
   }
 
   onCanvasPointerDown(event: PointerEvent): void {
+    if (event.pointerType === 'touch') return;
     this.mouseAimActive = true;
     if ((event.target as HTMLElement).closest('.fixed-joystick-zone,.ability-button-zone,button,.result-overlay')) return;
     event.preventDefault();
@@ -1082,9 +1283,40 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     this.fire();
   }
 
+  /** Cámara móvil: agranda visualmente los tanques sin alterar colisiones ni coordenadas de red. */
+  private cameraZoom = 1;
+  private cameraX = 0;
+  private cameraY = 0;
+  private beginCameraFrame(): void {
+    const viewport = this.canvasRef.nativeElement;
+    const rect = viewport.getBoundingClientRect();
+    const isMobile = Math.min(rect.width, rect.height) <= 650;
+    const target = this.playerTank ? { x: this.playerTank.x, y: this.playerTank.y } : { x: 640, y: 360 };
+    // Acercamiento visual, no modifica la escala de físicas, balas o SignalR.
+    this.cameraZoom = isMobile ? 1.035 : 1.0;
+    const viewW = 1280 / this.cameraZoom;
+    const viewH = 720 / this.cameraZoom;
+    this.cameraX = Math.max(0, Math.min(1280 - viewW, target.x - viewW / 2));
+    this.cameraY = Math.max(0, Math.min(720 - viewH, target.y - viewH / 2));
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, 1280, 720);
+    this.ctx.save();
+    this.ctx.setTransform(this.cameraZoom, 0, 0, this.cameraZoom,
+      -this.cameraX * this.cameraZoom, -this.cameraY * this.cameraZoom);
+  }
+
   private pointerToWorld(event: PointerEvent): { x: number; y: number } {
     const rect = this.canvasRef.nativeElement.getBoundingClientRect();
-    return { x: (event.clientX - rect.left) * 1280 / rect.width, y: (event.clientY - rect.top) * 720 / rect.height };
+    // Canvas 16:9 con object-fit:contain: compensar las barras laterales/superiores.
+    const displayScale = Math.min(rect.width / 1280, rect.height / 720);
+    const visibleW = 1280 * displayScale;
+    const visibleH = 720 * displayScale;
+    const localX = (event.clientX - rect.left - (rect.width - visibleW) / 2) / displayScale;
+    const localY = (event.clientY - rect.top - (rect.height - visibleH) / 2) / displayScale;
+    return {
+      x: Math.max(0, Math.min(1280, this.cameraX + localX / this.cameraZoom)),
+      y: Math.max(0, Math.min(720, this.cameraY + localY / this.cameraZoom))
+    };
   }
 
   onStickPointerDown(event: PointerEvent, side: 'left' | 'right'): void {
@@ -1100,7 +1332,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     if (this.stickPointer[side] !== event.pointerId) return;
     const origin = this.stickOrigin[side];
     let dx = event.clientX - origin.x, dy = event.clientY - origin.y;
-    const dist = Math.hypot(dx, dy), max = 30;
+    const dist = Math.hypot(dx, dy), max = 42;
     if (dist > max) { dx = dx / dist * max; dy = dy / dist * max; }
     const vectorX = dx / max, vectorY = dy / max;
     this[side === 'left' ? 'leftStick' : 'rightStick'].x = dx;

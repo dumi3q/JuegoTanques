@@ -37,7 +37,12 @@ const ABILIDADES: { [tankId: string]: AbilityInfo } = {
       <div class="canvas-wrapper">
         <canvas #gameCanvas (pointermove)="onCanvasPointerMove($event)" (pointerdown)="onCanvasPointerDown($event)"></canvas>
         <button class="offline-exit" type="button" (click)="salirPartida()">SALIR ✕</button>
-        <div class="offline-controls">WASD / Flechas: mover · Ratón: apuntar · Clic / Espacio: disparar · E: habilidad</div>
+
+        @if (roundNotice) {
+          <div class="round-result-overlay" role="status">
+            <div class="round-result-card">{{ roundNotice }}</div>
+          </div>
+        }
 
         <div class="top-hud">
           <div class="hud-box round-box">
@@ -101,6 +106,8 @@ const ABILIDADES: { [tankId: string]: AbilityInfo } = {
     </ion-content>
   `,
   styles: [`
+    .round-result-overlay {position:absolute;inset:0;z-index:60;display:flex;justify-content:center;align-items:center;pointer-events:none;background:rgba(0,0,0,.35)}
+    .round-result-card {max-width:85%;padding:16px 22px;background:rgba(7,13,27,.93);border:2px solid #ffbf24;border-radius:16px;color:#fff;font:800 clamp(17px,3.5vw,28px)/1.35 system-ui;text-align:center;box-shadow:0 10px 35px #000}
     .game-container { --background: #000000; }
     .offline-exit { position:absolute; top:16px; right:16px; z-index:40; border:1px solid #ff526f; border-radius:9px; padding:8px 13px; color:#fff; background:rgba(110,12,30,.86); font-weight:800; cursor:pointer; }
     .offline-controls { position:absolute; top:16px; left:16px; z-index:20; max-width:55vw; padding:7px 10px; color:#dbe7f5; background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.15); border-radius:8px; font:11px/1.4 system-ui,sans-serif; pointer-events:none; }
@@ -273,6 +280,109 @@ const ABILIDADES: { [tankId: string]: AbilityInfo } = {
       margin-top: 6px;
       letter-spacing: 0.5px;
     }
+
+    /* === MOBILE FIRST: landscape, safe areas y HUD sin obstáculos === */
+    :host { display:block; width:100%; height:100%; overflow:hidden; }
+    .game-container, .online-game-content { --background:#05070b; --overflow:hidden; }
+    .canvas-wrapper, .online-game-root {
+      width:100%; height:100%; height:100dvh; max-width:100%; max-height:100dvh;
+      overflow:hidden; position:relative; touch-action:none;
+      -webkit-user-select:none; user-select:none;
+    }
+    canvas { width:100%; height:100%; display:block; object-fit:contain; touch-action:none; }
+    .offline-controls, .pc-controls, .joystick-label { display:none !important; }
+    .top-hud, .online-hud {
+      position:absolute; top:max(5px, env(safe-area-inset-top)); left:50%;
+      transform:translateX(-50%); width:auto; max-width:65%;
+      gap:4px; margin:0; flex-wrap:nowrap; pointer-events:none;
+    }
+    .hud-box, .hud-pill {
+      padding:5px 8px; border-width:1px; border-radius:9px;
+      background:rgba(5,10,19,.8); white-space:nowrap;
+      font-size:clamp(9px,1.7vw,12px); line-height:1.15;
+    }
+    .hud-title, .hud-timer { font-size:clamp(9px,1.7vw,12px); }
+    .offline-exit, .leave-button {
+      position:absolute; z-index:35; top:max(6px, env(safe-area-inset-top));
+      right:max(8px, env(safe-area-inset-right));
+      padding:7px 10px; border-radius:10px; font-size:11px; line-height:1.1;
+    }
+    .fixed-joystick-zone {
+      position:absolute; bottom:max(9px, env(safe-area-inset-bottom));
+      width:clamp(96px,19vh,132px); height:clamp(96px,19vh,132px);
+      display:flex; align-items:center; justify-content:center; z-index:26;
+      touch-action:none; -webkit-user-select:none; user-select:none;
+    }
+    .left-joystick { left:max(12px, env(safe-area-inset-left)); }
+    .right-joystick { right:max(12px, env(safe-area-inset-right)); }
+    .joystick-base { width:82%; height:82%; box-sizing:border-box; border-radius:50%; }
+    .joystick-stick { width:44%; height:44%; box-sizing:border-box; border-radius:50%; }
+    .ability-button-zone {
+      position:absolute; z-index:28; width:clamp(56px,12vh,75px);
+      height:clamp(56px,12vh,75px);
+      right:max(32px, calc(env(safe-area-inset-right) + 26px));
+      bottom:calc(max(9px, env(safe-area-inset-bottom)) + clamp(96px,19vh,132px) + 3px);
+      touch-action:none;
+    }
+    .ability-icon { font-size:clamp(19px,4vh,25px); }
+    .ability-text { font-size:9px; }
+    .ammo-container, .online-ammo {
+      position:absolute; left:50%; right:auto; bottom:max(10px, env(safe-area-inset-bottom));
+      transform:translateX(-50%); display:flex; justify-content:center;
+      gap:5px; z-index:24; pointer-events:none;
+    }
+    .ammo-pill { width:clamp(9px,1.8vw,14px); height:clamp(19px,4vh,27px); }
+    .active-effect-banner, .online-effect {
+      position:absolute; top:calc(max(5px, env(safe-area-inset-top)) + 38px);
+      left:50%; transform:translateX(-50%); max-width:65%;
+      padding:4px 9px; border-width:1px; border-radius:8px;
+      font-size:11px; white-space:nowrap; pointer-events:none;
+    }
+    .online-message { top:22%; max-width:64%; font-size:11px; }
+    .result-overlay { padding:max(8px, env(safe-area-inset-top)) 12px; }
+    .result-card { max-height:94%; width:min(540px,96%); box-sizing:border-box; }
+    @media (max-height:420px) {
+      .fixed-joystick-zone { width:94px; height:94px; bottom:max(5px, env(safe-area-inset-bottom)); }
+      .ability-button-zone { width:52px; height:52px; bottom:105px; right:max(24px, env(safe-area-inset-right)); }
+      .hud-box, .hud-pill { padding:3px 6px; }
+      .online-hud { max-width:68%; }
+    }
+
+    /* AJUSTE V2: cámara equilibrada y controles grandes al jugar en horizontal */
+    .fixed-joystick-zone {
+      width: clamp(128px, 23vh, 164px) !important;
+      height: clamp(128px, 23vh, 164px) !important;
+      bottom: max(14px, env(safe-area-inset-bottom)) !important;
+      z-index: 26;
+    }
+    .left-joystick { left: max(20px, env(safe-area-inset-left)) !important; }
+    .right-joystick { right: max(20px, env(safe-area-inset-right)) !important; }
+    .fixed-joystick-zone .joystick-base {
+      width: 84% !important;
+      height: 84% !important;
+      min-width: 0;
+      min-height: 0;
+      border: 2px solid rgba(255,255,255,.52);
+      background: rgba(24,37,54,.35);
+    }
+    .fixed-joystick-zone .joystick-stick {
+      width: 45% !important;
+      height: 45% !important;
+      background: rgba(255,200,70,.48);
+      border: 2px solid rgba(255,230,170,.75);
+    }
+    .ability-button-zone {
+      width: clamp(66px, 13vh, 82px) !important;
+      height: clamp(66px, 13vh, 82px) !important;
+      right: max(44px, calc(env(safe-area-inset-right) + 44px)) !important;
+      bottom: calc(max(14px, env(safe-area-inset-bottom)) + clamp(128px, 23vh, 164px) + 7px) !important;
+    }
+    @media (max-height: 430px) {
+      .fixed-joystick-zone { width: 126px !important; height: 126px !important; bottom: 8px !important; }
+      .left-joystick { left: max(10px, env(safe-area-inset-left)) !important; }
+      .right-joystick { right: max(10px, env(safe-area-inset-right)) !important; }
+      .ability-button-zone { width: 64px !important; height: 64px !important; bottom: 139px !important; right: max(30px, env(safe-area-inset-right)) !important; }
+    }
   `]
 })
 export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, ViewWillLeave {
@@ -317,6 +427,10 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
   public totalRondas: number = 5;
   public roundTimeLeft: number = 60;
   private roundTimerInterval: any = null;
+  public roundNotice = '';
+  private roundClosing = false;
+  private matchEnded = false;
+  private roundTransitionTimer: ReturnType<typeof setTimeout> | null = null;
   public playerWins: number = 0;
   public botWins: number = 0;
 
@@ -329,7 +443,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
 
   public leftJoystick = { active: false, stickX: 0, stickY: 0, vectorX: 0, vectorY: 0, identifier: null as number | null };
   public rightJoystick = { active: false, stickX: 0, stickY: 0, vectorX: 0, vectorY: 0, identifier: null as number | null };
-  private maxRadius = 30;
+  private maxRadius = 42;
   public bullets: Bullet[] = [];
   private keys: { [key: string]: boolean } = {};
 
@@ -414,9 +528,12 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
     cancelAnimationFrame(this.animationFrameId);
     if (this.effectTimerInterval) clearInterval(this.effectTimerInterval);
     if (this.roundTimerInterval) clearInterval(this.roundTimerInterval);
+    if (this.roundTransitionTimer) clearTimeout(this.roundTransitionTimer);
   }
 
   private initNewRound() {
+    this.roundClosing = false;
+    this.roundNotice = '';
     this.resetAbility();
     this.bullets = [];
     this.itemManager.activeItems = [];
@@ -527,23 +644,34 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
   }
 
   private endRound(reason: 'player_dead' | 'bots_dead' | 'timeout') {
+    // Una muerte y una eliminación en el mismo frame no cuentan varias veces.
+    if (this.roundClosing || this.matchEnded) return;
+    this.roundClosing = true;
     if (this.roundTimerInterval) clearInterval(this.roundTimerInterval);
 
-    if (reason === 'bots_dead') {
-      this.playerWins++;
-    } else {
-      this.botWins++;
-    }
+    const ganoJugador = reason === 'bots_dead';
+    if (ganoJugador) this.playerWins++;
+    else this.botWins++;
 
+    const ronda = this.currentRound;
     const requiredWins = Math.ceil(this.totalRondas / 2);
-    if (this.playerWins >= requiredWins || this.botWins >= requiredWins || this.currentRound >= this.totalRondas) {
-      alert(this.playerWins > this.botWins ? '🏆 ¡VICTORIA GLOBAL DE LA PARTIDA!' : '💀 ¡DERROTA GLOBAL!');
-      this.router.navigate(['/home']);
-      return;
+    const final = this.playerWins >= requiredWins || this.botWins >= requiredWins || ronda >= this.totalRondas;
+    this.roundNotice = `${ganoJugador ? '🏆 ¡GANASTE' : '💀 LA IA GANÓ'} LA RONDA ${ronda}!`;
+    if (final) {
+      this.matchEnded = true;
+      this.roundNotice += this.playerWins > this.botWins
+        ? ' · ¡VICTORIA FINAL!'
+        : this.playerWins < this.botWins ? ' · DERROTA FINAL' : ' · EMPATE FINAL';
     }
-
-    this.currentRound++;
-    this.initNewRound();
+    if (this.roundTransitionTimer) clearTimeout(this.roundTransitionTimer);
+    this.roundTransitionTimer = setTimeout(() => {
+      if (final) {
+        void this.router.navigateByUrl('/home', { replaceUrl: true });
+      } else {
+        this.currentRound++;
+        this.initNewRound();
+      }
+    }, final ? 3200 : 2100);
   }
 
   public onAbilityPress(event: Event) {
@@ -732,16 +860,23 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
       for (let offset of [-0.2, 0, 0.2]) {
         const bullet = new Bullet(startX, startY, this.playerTank.turretAngle + offset, this.currentWeaponId, piercing);
         (bullet as any).isPlayer = true;
+        (bullet as any).__escopeta = this.currentWeaponId === 'WEAP-01';
+        (bullet as any).__origenX = bullet.x;
+        (bullet as any).__origenY = bullet.y;
         this.bullets.push(bullet);
       }
     } else {
       const bullet = new Bullet(startX, startY, this.playerTank.turretAngle, this.currentWeaponId, piercing);
       (bullet as any).isPlayer = true;
+      (bullet as any).__escopeta = this.currentWeaponId === 'WEAP-01';
+      (bullet as any).__origenX = bullet.x;
+      (bullet as any).__origenY = bullet.y;
       this.bullets.push(bullet);
     }
   }
 
   onCanvasPointerMove(event: PointerEvent) {
+    if (event.pointerType === 'touch') return;
     this.mouseAimActive = true;
     const point = this.pointerToWorld(event);
     this.playerTank.turretAngle = Math.atan2(point.y - this.playerTank.y, point.x - this.playerTank.x);
@@ -750,21 +885,51 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
   onCanvasPointerDown(event: PointerEvent) {
     if ((event.target as HTMLElement).closest('.fixed-joystick-zone,.ability-button-zone,button')) return;
     event.preventDefault();
+    if (event.pointerType === 'touch') return;
     this.mouseAimActive = true;
     const point = this.pointerToWorld(event);
     this.playerTank.turretAngle = Math.atan2(point.y - this.playerTank.y, point.x - this.playerTank.x);
     this.triggerShot();
   }
 
+  /** Cámara móvil: agranda visualmente los tanques sin alterar colisiones ni coordenadas de red. */
+  private cameraZoom = 1;
+  private cameraX = 0;
+  private cameraY = 0;
+  private beginCameraFrame(): void {
+    const viewport = this.canvasRef.nativeElement;
+    const rect = viewport.getBoundingClientRect();
+    const isMobile = Math.min(rect.width, rect.height) <= 650;
+    const target = this.playerTank ? { x: this.playerTank.x, y: this.playerTank.y } : { x: 640, y: 360 };
+    // Acercamiento visual, no modifica la escala de físicas, balas o SignalR.
+    this.cameraZoom = isMobile ? 1.035 : 1.0;
+    const viewW = 1280 / this.cameraZoom;
+    const viewH = 720 / this.cameraZoom;
+    this.cameraX = Math.max(0, Math.min(1280 - viewW, target.x - viewW / 2));
+    this.cameraY = Math.max(0, Math.min(720 - viewH, target.y - viewH / 2));
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, 1280, 720);
+    this.ctx.save();
+    this.ctx.setTransform(this.cameraZoom, 0, 0, this.cameraZoom,
+      -this.cameraX * this.cameraZoom, -this.cameraY * this.cameraZoom);
+  }
+
   private pointerToWorld(event: PointerEvent): { x: number; y: number } {
     const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+    // Canvas 16:9 con object-fit:contain: compensar las barras laterales/superiores.
+    const displayScale = Math.min(rect.width / 1280, rect.height / 720);
+    const visibleW = 1280 * displayScale;
+    const visibleH = 720 * displayScale;
+    const localX = (event.clientX - rect.left - (rect.width - visibleW) / 2) / displayScale;
+    const localY = (event.clientY - rect.top - (rect.height - visibleH) / 2) / displayScale;
     return {
-      x: Math.max(0, Math.min(1280, (event.clientX - rect.left) * 1280 / rect.width)),
-      y: Math.max(0, Math.min(720, (event.clientY - rect.top) * 720 / rect.height))
+      x: Math.max(0, Math.min(1280, this.cameraX + localX / this.cameraZoom)),
+      y: Math.max(0, Math.min(720, this.cameraY + localY / this.cameraZoom))
     };
   }
 
   public salirPartida(): void {
+    if (this.roundTransitionTimer) clearTimeout(this.roundTransitionTimer);
     if (this.roundTimerInterval) clearInterval(this.roundTimerInterval);
     if (this.effectTimerInterval) clearInterval(this.effectTimerInterval);
     cancelAnimationFrame(this.animationFrameId);
@@ -860,6 +1025,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
   }
 
   private updateGame() {
+    if (this.roundClosing || this.matchEnded) return;
     const now = Date.now();
     this.updateAbility(now);
 
@@ -950,8 +1116,27 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
 
     this.bullets.forEach(b => {
       b.update(this.gameMap, 1280, 720);
+      // Escopeta: alcance máximo de 260 unidades del mundo.
+      if ((b as any).__escopeta) {
+        const x0 = (b as any).__origenX;
+        const y0 = (b as any).__origenY;
+        if (typeof x0 === 'number' && typeof y0 === 'number' &&
+          Math.hypot(b.x - x0, b.y - y0) >= 260) b.active = false;
+      }
     });
     this.bullets = this.bullets.filter(b => b.active);
+  }
+
+  // Aumenta SOLO el dibujo del tanque, nunca el mapa ni su hitbox.
+  private drawMobileTank(tank: Tank, effect: string | null): void {
+    const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+    const factor = Math.min(rect.width, rect.height) <= 650 ? 1.16 : 1;
+    this.ctx.save();
+    this.ctx.translate(tank.x, tank.y);
+    this.ctx.scale(factor, factor);
+    this.ctx.translate(-tank.x, -tank.y);
+    tank.draw(this.ctx, effect);
+    this.ctx.restore();
   }
 
   private drawHealthBar(tank: Tank, maxHp: number) {
@@ -974,17 +1159,17 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
 
   private startGameLoop = () => {
     this.updateGame();
-    this.ctx.clearRect(0, 0, 1280, 720);
+    this.beginCameraFrame();
     this.gameMap.draw(this.ctx, 1280, 720);
 
     this.drawSlowZone();
     this.itemManager.draw(this.ctx);
 
-    this.playerTank.draw(this.ctx, this.activeEffect);
+    this.drawMobileTank(this.playerTank, this.activeEffect);
     this.drawHealthBar(this.playerTank, this.playerTank.tankData.vida_base);
 
     this.botAIs.forEach(bot => {
-      bot.tank.draw(this.ctx, null);
+      this.drawMobileTank(bot.tank, null);
       this.drawHealthBar(bot.tank, bot.tank.tankData.vida_base);
     });
 
@@ -998,6 +1183,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
       );
     }
 
+    this.ctx.restore(); // termina la cámara: la próxima frame inicia limpia
     this.animationFrameId = requestAnimationFrame(this.startGameLoop);
   }
 }

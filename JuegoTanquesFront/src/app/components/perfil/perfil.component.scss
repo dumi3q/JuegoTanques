@@ -1,174 +1,204 @@
 :host {
   display: block;
+  width: 100%;
   height: 100%;
-  width: 100%;
-}
-/* Contenedor principal adaptable para celulares */
-.glass-perfil-card,
-.glass-ranking-card,
-.glass-config-card { /* O la clase general que usen tus contenedores */
-  width: 92% !important;
-  max-width: 550px !important;
-  max-height: 85vh !important; /* Evita que crezca más allá de la pantalla del celular */
-  margin: 10px auto !important;
-  padding: 16px !important;
-  overflow-y: auto !important; /* Permite hacer scroll interno si el contenido es largo */
+  min-width: 0;
 }
 
-/* Ajuste específico para el contenedor de la foto de perfil en móvil */
-.profile-avatar-img {
-  width: 75px !important;
-  height: 75px !important;
-  border-radius: 50% !important;
-  object-fit: cover !important;
-  border: 2px solid #d4af37;
-}
-
-/* Contenedor general de las vistas para evitar que se salgan en horizontal */
-.perfil-container, .ranking-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100%;
-  padding: 10px;
-}
-
-.perfil-bg {
-  --background: url('/assets/imgs/profile.jpg') no-repeat center center / cover !important;
-}
-
-.perfil-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100%;
-  width: 100%;
-  padding: 20px;
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
+.perfil-bg {
+  --background: url('/assets/imgs/profile.jpg') no-repeat center center / cover;
+}
+
+.perfil-container {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 14px 10px 24px;
+}
+
 .glass-perfil-card {
+  width: min(100%, 540px);
+  min-width: 0;
+  margin: auto 0;
+  padding: clamp(12px, 3vw, 20px);
+  color: #fff;
+  background: rgba(12,12,12,.82);
+  border: 1px solid rgba(255,255,255,.2);
+  border-top-color: rgba(255,255,255,.35);
+  border-radius: 22px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.75);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  background: rgba(12, 12, 12, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-top: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
-  width: 100%;
-  max-width: 540px;
-  padding: 20px;
-  color: #ffffff;
 }
 
 .custom-segment {
-  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  background: rgba(0,0,0,.46);
   border-radius: 12px;
-  padding: 4px;
-  margin-bottom: 16px;
+  padding: 3px;
+  margin-bottom: 14px;
 
   ion-segment-button {
-    --color: #aaaaaa;
-    --color-checked: #ffffff;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    margin: 0;
+    --color: #bbb;
+    --color-checked: #fff;
     --indicator-color: #d97706;
+    font-size: clamp(.7rem, 2.9vw, .9rem);
     font-weight: 700;
+    text-transform: none;
+
+    ion-label {
+      font-size: inherit;
+      margin: 0;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      text-align: center;
+      line-height: 1.2;
+    }
   }
 }
+
+.feedback {
+  text-align: center;
+  font-size: .8rem;
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+
+  .feedback.error {
+    color: #ff4961;
+  }
+
+  .feedback.message {
+    color: #ffc409;
+  }
 
 .tab-content {
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 4px;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(217, 119, 6, 0.5);
-    border-radius: 4px;
-  }
+  min-width: 0;
+  width: 100%;
+  overflow: visible;
 
   h3 {
-    font-size: 1rem;
+    font-size: clamp(.95rem, 3.8vw, 1.1rem);
     font-weight: 700;
     color: #fbbf24;
-    margin-bottom: 10px;
+    margin: 0 0 12px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
   }
 }
 
-/* Identidad */
 .profile-header-card {
+  display: grid;
+  grid-template-columns: minmax(100px, 138px) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: clamp(12px,3vw,18px);
+  margin-bottom: 16px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+}
+
+.avatar-container {
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
+  flex-direction: column;
+  gap: 7px;
+  text-align: center;
+}
 
-  .avatar-ring {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: url('/assets/imgs/avatars/user1.png') center/cover;
-    border: 2px solid #fbbf24;
-    position: relative;
+.profile-avatar-container {
+  display: flex;
+  justify-content: center;
+}
 
-    .level-badge {
-      position: absolute;
-      bottom: -6px;
-      right: -6px;
-      background: #d97706;
-      color: #fff;
-      font-size: 0.65rem;
-      padding: 2px 6px;
-      border-radius: 8px;
-      font-weight: 800;
-    }
+.profile-avatar-img {
+  display: block;
+  width: clamp(65px,17vw,90px);
+  height: clamp(65px,17vw,90px);
+  border-radius: 50%;
+  border: 3px solid #d4af37;
+  object-fit: cover;
+}
+
+.photo-btn {
+  --padding-start: 7px;
+  --padding-end: 7px;
+  font-size: .69rem;
+  min-width: 0;
+  margin: 0;
+  white-space: normal;
+}
+
+.level-badge {
+  font-size: .76rem;
+  color: #ffc409;
+}
+
+.profile-titles {
+  text-align: center;
+  min-width: 0;
+
+  h2 {
+    margin: 0 0 5px;
+    font-weight: 800;
+    font-size: clamp(1.15rem,5vw,1.65rem);
+    overflow-wrap: anywhere;
+    line-height: 1.2;
   }
 
-  .profile-titles {
-    h2 {
-      margin: 0;
-      font-size: 1.3rem;
-      font-weight: 800;
-    }
+  .rank-title {
+    margin: 0 0 8px;
+    color: #fbbf24;
+    font-size: .85rem;
+    overflow-wrap: anywhere;
+  }
 
-    .rank-title {
-      margin: 2px 0 6px 0;
-      font-size: 0.85rem;
-      color: #fbbf24;
-    }
-
-    .coins-pill {
-      font-size: 0.8rem;
-      background: rgba(0,0,0,0.4);
-      padding: 2px 8px;
-      border-radius: 6px;
-      display: inline-block;
-      color: #e2e8f0;
-    }
+  .coins-pill {
+    display: inline-block;
+    max-width: 100%;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(0,0,0,.4);
+    color: #e2e8f0;
+    font-size: .8rem;
+    overflow-wrap: anywhere;
   }
 }
 
 .loadout-summary {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 0;
+  padding: 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.09);
   border-radius: 16px;
-  padding: 16px;
 
   .loadout-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-    background: rgba(0,0,0,0.2);
-    padding: 10px;
+    gap: 11px;
+    padding: 11px;
+    margin-bottom: 9px;
+    background: rgba(0,0,0,.25);
     border-radius: 10px;
+    min-width: 0;
 
     ion-icon {
+      flex: 0 0 24px;
       font-size: 24px;
       color: #fbbf24;
     }
@@ -176,101 +206,148 @@
     .loadout-info {
       display: flex;
       flex-direction: column;
+      min-width: 0;
+      gap: 2px;
 
       span {
-        font-size: 0.75rem;
         color: #aaa;
+        font-size: .75rem;
       }
 
       strong {
-        font-size: 0.9rem;
+        font-size: .9rem;
         color: #fff;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+        line-height: 1.35;
       }
+    }
+  }
+
+    .loadout-item:last-child {
+      margin-bottom: 0;
+    }
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px;
+}
+
+.inv-card {
+  min-width: 0;
+  padding: 10px;
+  text-align: center;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+
+  &.equipped {
+    border-color: #fbbf24;
+    background: rgba(217,119,6,.15);
+  }
+
+  .inv-img-box {
+    width: 100%;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .inv-details {
+    min-width: 0;
+
+    h4 {
+      margin: 7px 0 4px;
+      font-size: .87rem;
+      overflow-wrap: anywhere;
+    }
+
+    span {
+      display: block;
+      color: #bbb;
+      font-size: .72rem;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+      margin-bottom: 6px;
+    }
+
+    ion-button {
+      margin: 4px 0 0;
+      max-width: 100%;
     }
   }
 }
 
-/* Inventario Grid */
-.inventory-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-
-  .inv-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-
-    &.equipped {
-      border-color: #fbbf24;
-      background: rgba(217, 119, 6, 0.15);
-    }
-
-    .inv-img-box {
-      height: 70px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      img {
-        max-height: 100%;
-        max-width: 100%;
-        object-fit: contain;
-      }
-    }
-
-    .inv-details {
-      h4 {
-        margin: 6px 0 2px 0;
-        font-size: 0.9rem;
-      }
-
-      span {
-        font-size: 0.75rem;
-        color: #aaa;
-        display: block;
-        margin-bottom: 6px;
-      }
-    }
-  }
+.weapons-heading {
+  margin-top: 18px !important;
 }
 
 .weapons-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
 
-  .weapon-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 10px 14px;
-    border-radius: 10px;
+.weapon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.05);
 
-    strong {
-      font-size: 0.85rem;
-      display: block;
-    }
+  .weapon-info {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
 
-    small {
-      font-size: 0.7rem;
-      color: #aaa;
-    }
+  strong {
+    display: block;
+    color: #fff;
+    font-size: .85rem;
+    overflow-wrap: anywhere;
+  }
+
+  small {
+    display: block;
+    margin-top: 3px;
+    color: #bbb;
+    font-size: .72rem;
+    overflow-wrap: anywhere;
+  }
+
+  .weapon-action {
+    flex: 0 0 auto;
   }
 }
 
-/* Presets */
 .presets-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+  }
 
   .action-btn {
+    margin: 0;
     --background: #d97706;
+    font-size: .78rem;
     font-weight: 700;
   }
 }
@@ -279,36 +356,75 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
 
-  .preset-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 12px;
-    border-radius: 12px;
+.preset-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
 
-    .preset-info {
-      h4 {
-        margin: 0 0 4px 0;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: #fbbf24;
-      }
+  .preset-info {
+    min-width: 0;
+    flex: 1 1 auto;
 
-      p {
-        margin: 0 0 2px 0;
-        font-size: 0.75rem;
-        color: #ddd;
-      }
-
-      small {
-        font-size: 0.7rem;
-        color: #aaa;
-      }
+    h4 {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      color: #fbbf24;
+      margin: 0 0 4px;
+      font-size: .89rem;
+      overflow-wrap: anywhere;
     }
+
+    p {
+      margin: 0;
+      color: #ddd;
+      font-size: .75rem;
+      overflow-wrap: anywhere;
+      line-height: 1.35;
+    }
+  }
+
+  ion-button {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+}
+
+.empty-state {
+  font-size: .8rem;
+  opacity: .75;
+}
+
+@media (max-width: 360px) {
+  .profile-header-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-avatar-img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .custom-segment ion-segment-button {
+    font-size: .67rem;
+  }
+
+  .inventory-grid {
+    grid-template-columns: minmax(0,1fr);
+  }
+}
+
+@media (max-height: 660px) {
+  .glass-perfil-card {
+    margin: 0;
   }
 }

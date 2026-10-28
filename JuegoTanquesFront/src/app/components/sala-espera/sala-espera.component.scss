@@ -1,85 +1,112 @@
 :host {
   display: block;
-  height: 100%;
   width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 .salas-bg {
-  --background: url('/assets/imgs/salas.jpg') no-repeat center center / cover !important;
+  --background: url('/assets/imgs/salas.jpg') no-repeat center center / cover;
 }
 
 .salas-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 100%;
+  justify-content: center;
   width: 100%;
-  padding: 16px;
-  box-sizing: border-box;
+  min-height: 100%;
+  padding: clamp(10px, 3vw, 20px);
 }
 
 .glass-salas-card {
+  width: min(100%, 580px);
+  min-width: 0;
+  padding: clamp(14px, 4vw, 24px);
+  border-radius: 22px;
+  color: #fff;
+  background: rgba(12,12,12,.84);
+  border: 1px solid rgba(255,255,255,.2);
+  border-top-color: rgba(255,255,255,.35);
+  box-shadow: 0 20px 50px rgba(0,0,0,.65);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  background: rgba(12, 12, 12, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-top: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
-  width: 100%;
-  max-width: 580px;
-  padding: 24px;
-  color: #ffffff;
 }
 
 .salas-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 10px;
   margin-bottom: 16px;
 
+  .salas-heading {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
   h2 {
-    margin: 0;
-    font-size: 1.3rem;
+    font-size: clamp(1.05rem, 4.4vw, 1.35rem);
     font-weight: 800;
-    letter-spacing: 0.5px;
+    margin: 0;
+    letter-spacing: .3px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
   }
 
   p {
-    margin: 2px 0 0 0;
-    font-size: 0.75rem;
-    color: #aaa;
+    margin: 5px 0 0;
+    font-size: .78rem;
+    color: #bbb;
+    line-height: 1.35;
+  }
+
+  .exit-btn {
+    flex: 0 0 auto;
+    margin: 0;
+    font-size: .8rem;
+    --padding-start: 8px;
+    --padding-end: 8px;
   }
 }
 
 .code-banner {
-  background: rgba(217, 119, 6, 0.15);
-  border: 1px solid rgba(255, 191, 36, 0.3);
-  border-radius: 16px;
-  padding: 12px;
-  text-align: center;
+  padding: 12px 10px;
   margin-bottom: 16px;
+  text-align: center;
+  background: rgba(217,119,6,.15);
+  border: 1px solid rgba(255,191,36,.3);
+  border-radius: 16px;
 
   .code-label {
-    font-size: 0.7rem;
+    display: block;
     color: #fbbf24;
     font-weight: 700;
-    letter-spacing: 1px;
-    display: block;
+    font-size: .72rem;
+    letter-spacing: .6px;
   }
 
   .code-value {
-    margin: 4px 0;
-    font-size: 1.8rem;
-    font-weight: 900;
-    letter-spacing: 2px;
+    margin: 5px 0 8px;
     color: #fff;
+    font-size: clamp(1.3rem, 7vw, 2rem);
+    font-weight: 900;
+    letter-spacing: clamp(0px, .25vw, 2px);
+    overflow-wrap: anywhere;
+    line-height: 1.18;
   }
 
   .sala-meta {
-    margin: 0;
-    font-size: 0.8rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 12px;
     color: #d1d5db;
+    font-size: .78rem;
+    line-height: 1.4;
   }
 }
 
@@ -87,118 +114,144 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 260px;
+  max-height: min(36vh, 290px);
   overflow-y: auto;
   margin-bottom: 16px;
-  padding-right: 4px;
+  padding-right: 2px;
+}
 
-  .slot-card-item {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-left: 5px solid #fbbf24;
-    border-radius: 14px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.slot-card-item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-left: 4px solid #fbbf24;
+  border-radius: 14px;
+}
 
-    .player-avatar-container {
-      position: relative;
-      width: 44px;
-      height: 44px;
+.player-avatar-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #222;
+  border: 2px solid #00d2ff;
+  flex-shrink: 0;
+}
 
-      .player-avatar {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-      }
+.player-avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-      .slot-color-dot {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        border: 2px solid #141414;
-      }
-    }
+.player-info {
+  min-width: 0;
+}
 
-    .player-info {
-      flex: 1;
+.player-name-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 7px;
 
-      .player-name-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
+  h4 {
+    margin: 0;
+    color: #fff;
+    font-weight: 700;
+    font-size: .95rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
 
-        h4 {
-          margin: 0;
-          font-size: 0.95rem;
-          font-weight: 700;
-          color: #fff;
-        }
-      }
-
-      .player-preset {
-        margin: 3px 0 0 0;
-        font-size: 0.75rem;
-        color: #aaa;
-      }
-    }
+  ion-badge {
+    font-size: .65rem;
   }
 }
 
-.color-picker-section {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  padding: 10px 14px;
-  margin-bottom: 16px;
-  text-align: center;
+.player-preset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin: 5px 0 0;
+  font-size: .75rem;
+  color: #c0c0c0;
+  line-height: 1.35;
+}
 
-  label {
-    font-size: 0.8rem;
-    color: #ccc;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 8px;
-  }
+.player-status-badge {
+  justify-self: end;
+  align-self: center;
 
-  .colors-row {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-
-    .color-circle {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.4);
-      cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.2s ease;
-
-      &:hover {
-        transform: scale(1.15);
-        border-color: #fff;
-      }
-    }
+  ion-badge {
+    font-size: .65rem;
+    white-space: nowrap;
+    padding: 6px 7px;
   }
 }
 
 .action-footer {
-  .deploy-btn {
-    --background: #d97706;
-    --border-radius: 12px;
-    font-weight: 800;
-    height: 48px;
+  .ready-help {
+    margin: 0 0 12px;
+    text-align: center;
+    color: #c7d3e7;
+    font-size: clamp(.8rem, 3.2vw, .95rem);
+    line-height: 1.4;
   }
 
   .ready-btn {
+    margin: 0;
+    width: 100%;
+    min-height: 48px;
+    height: auto;
     --border-radius: 12px;
     font-weight: 800;
-    height: 48px;
+    font-size: clamp(.75rem, 3.4vw, 1rem);
+    --padding-start: 10px;
+    --padding-end: 10px;
+  }
+
+  .ready-label {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
+    padding: 8px 0;
+  }
+}
+
+@media (max-width: 370px) {
+  .slot-card-item {
+    grid-template-columns: 42px minmax(0,1fr);
+    gap: 8px;
+  }
+
+  .player-avatar-container {
+    width: 42px;
+    height: 42px;
+  }
+
+  .player-status-badge {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .salas-header .exit-btn {
+    font-size: .7rem;
+  }
+}
+
+@media (max-height: 680px) {
+  .salas-container {
+    align-items: flex-start;
+  }
+
+  .slots-list-area {
+    max-height: 28vh;
   }
 }
