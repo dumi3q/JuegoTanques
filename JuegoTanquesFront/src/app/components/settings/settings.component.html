@@ -19,14 +19,6 @@
 
           <div class="range-item">
             <div class="range-label">
-              <span>Música de Fondo</span>
-              <span class="range-val">{{ volumenMusica }}%</span>
-            </div>
-            <ion-range min="0" max="100" [(ngModel)]="volumenMusica" color="warning"></ion-range>
-          </div>
-
-          <div class="range-item">
-            <div class="range-label">
               <span>Efectos de Fuego y Explosiones</span>
               <span class="range-val">{{ volumenEfectos }}%</span>
             </div>
@@ -67,19 +59,9 @@
             Gráficos y Visuales
           </h3>
 
-          <div class="select-item">
-            <span>Calidad Gráfica</span>
-            <ion-select [(ngModel)]="calidadGrafica" interface="popover">
-              <ion-select-option value="baja">Baja (Rendimiento)</ion-select-option>
-              <ion-select-option value="media">Media</ion-select-option>
-              <ion-select-option value="alta">Alta (Recomendado)</ion-select-option>
-              <ion-select-option value="ultra">Ultra (Taller HD)</ion-select-option>
-            </ion-select>
-          </div>
-
           <div class="toggle-item">
-            <span>Efectos de Humo y Polvo</span>
-            <ion-toggle [(ngModel)]="efectosHumo" color="warning"></ion-toggle>
+            <span>Mostrar contador FPS</span>
+            <ion-toggle [(ngModel)]="mostrarFps" color="warning"></ion-toggle>
           </div>
         </div>
 

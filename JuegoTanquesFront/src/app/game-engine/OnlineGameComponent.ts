@@ -13,6 +13,8 @@ import { Bullet } from './Bullet';
 import { AimTrajectory } from './AimTrajectory';
 import { TANQUES_JUEGO, Tanque } from '../models/game-data';
 import { codigoArma, codigoTanque } from '../models/CatalogoUtil';
+import { AjustesService } from '../services/ajustes.service';
+import { FeedbackService } from '../services/feedback.service';
 
 interface OnlinePlayer {
   usuarioId: number;
@@ -55,6 +57,7 @@ interface OnlinePowerUp {
         <canvas #gameCanvas
                 (pointermove)="onCanvasPointerMove($event)"
                 (pointerdown)="onCanvasPointerDown($event)"></canvas>
+        @if (mostrarFps) { <div class="fps-counter">{{ fps }} FPS</div> }
 
         <div class="online-hud">
           <div class="hud-pill">RONDA {{ currentRound }} / {{ totalRounds }}</div>
@@ -153,6 +156,7 @@ interface OnlinePowerUp {
     .online-game-content { --background:#000; }
     .online-game-root { position:relative; display:flex; justify-content:center; align-items:center; width:100vw; height:100dvh; overflow:hidden; background:#000; touch-action:none; user-select:none; }
     canvas { display:block; width:100%; height:100%; object-fit:contain; touch-action:none; }
+    .fps-counter { position:absolute; top:12px; left:12px; z-index:40; padding:5px 8px; border-radius:7px; color:#8cff9b; background:rgba(0,0,0,.72); font:700 11px system-ui,sans-serif; pointer-events:none; }
     .online-hud { position:absolute; top:20px; left:50%; transform:translateX(-50%); z-index:20; display:flex; flex-wrap:wrap; justify-content:center; gap:7px; width:min(95vw,900px); pointer-events:none; }
     .hud-pill { color:#fff; background:rgba(0,0,0,.8); border:2px solid rgba(0,210,255,.6); border-radius:10px; padding:8px 12px; font:700 12px/1.2 system-ui,sans-serif; backdrop-filter:blur(4px); }
     .hud-pill.team-mode { border-color:#b266ff; }
@@ -315,6 +319,8 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
 
   private readonly router = inject(Router);
   private readonly signalr = inject(SignalrService);
+  private readonly ajustesService = inject(AjustesService);
+  private readonly feedback = inject(FeedbackService);
   private ctx!: CanvasRenderingContext2D;
   private gameMap!: GameMap;
   private frameId = 0;
@@ -335,6 +341,12 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
   private poisonTicks = new Map<number, number>();
   private powerUpImages = new Map<string, HTMLImageElement>();
   private mouseAimActive = false;
+  private sensibilidadApuntado = 0.5;
+  private apuntadoAsistido = true;
+  public mostrarFps = false;
+  public fps = 0;
+  private fpsFrames = 0;
+  private fpsDesde = performance.now();
   public abilityState: 'listo' | 'armada' | 'recarga' = 'listo';
   public abilitySecondsLeft = 0;
   public abilityIcon = '💨';
@@ -379,6 +391,10 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
   public get rightStickTransform(): string { return `translate(${this.rightStick.x}px, ${this.rightStick.y}px)`; }
 
   async ngOnInit(): Promise<void> {
+    const ajustes = this.ajustesService.ajustes();
+    this.mostrarFps = ajustes.mostrarFps;
+    this.sensibilidadApuntado = ajustes.sensibilidadApuntado / 100;
+    this.apuntadoAsistido = ajustes.apuntadoAsistido;
     const canvas = this.canvasRef.nativeElement;
     this.ctx = canvas.getContext('2d')!;
     canvas.width = 1280;
@@ -468,6 +484,8 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
 
     this.subs.push(this.signalr.disparoConsumido$.subscribe(id => {
       if (!id) return;
+      const disparo = this.bullets.find(b => b.id === String(id));
+      if (disparo?.ownerId === this.myId) this.feedback.impactoEnemigo();
       this.bullets = this.bullets.filter(b => b.id !== String(id));
     }));
 
@@ -540,8 +558,11 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
       const id = Number(evt.usuarioId ?? evt.UsuarioId);
       const p = this.players.get(id);
       if (!p) return;
-      p.tank.currentHp = Number(evt.hpActual ?? evt.HpActual ?? p.tank.currentHp);
+      const hpAnterior = p.tank.currentHp;
+      const hpActual = Number(evt.hpActual ?? evt.HpActual ?? hpAnterior);
+      p.tank.currentHp = hpActual;
       p.vidas = Number(evt.vidas ?? evt.Vidas ?? p.vidas);
+      if (id === this.myId && hpActual < hpAnterior) this.feedback.impactoRecibido();
       if (p.vidas <= 0 && p.tank.currentHp <= 0) p.eliminado = true;
     }));
 
@@ -899,6 +920,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     this.currentAmmo--;
     this.updateAmmoHud();
     this.lastAmmoShot = Date.now();
+    this.feedback.disparo(this.myPlayer.weaponId);
 
     // No permitir disparos si la partida no está activa
     if (
@@ -1063,6 +1085,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
   }
 
   private gameLoop = (): void => {
+    this.actualizarFps();
     if (!this.ctx || !this.gameMap) return;
     // Renderizar siempre el mapa y los jugadores remotos aunque el ID local aún no haya coincidido.
     // Antes, exigir playerTank aquí detenía por completo el render y dejaba el canvas negro.
@@ -1151,7 +1174,10 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
       p.tank.move(dx * multiplier, dy * multiplier, this.gameMap, 1280, 720);
 
       if (this.rightStick.dx !== 0 || this.rightStick.dy !== 0) {
-        p.tank.turretAngle = Math.atan2(this.rightStick.dy, this.rightStick.dx);
+        p.tank.turretAngle = this.suavizarAngulo(
+          p.tank.turretAngle,
+          Math.atan2(this.rightStick.dy, this.rightStick.dx)
+        );
       }
 
       if (this.currentAmmo < this.maxAmmo) {
@@ -1340,7 +1366,10 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     this[side === 'left' ? 'leftStick' : 'rightStick'].dx = vectorX;
     this[side === 'left' ? 'leftStick' : 'rightStick'].dy = vectorY;
     if (side === 'right' && Math.hypot(vectorX, vectorY) > .12 && this.playerTank) {
-      this.playerTank.turretAngle = Math.atan2(vectorY, vectorX);
+      this.playerTank.turretAngle = this.suavizarAngulo(
+        this.playerTank.turretAngle,
+        Math.atan2(vectorY, vectorX)
+      );
     }
   }
 
@@ -1348,7 +1377,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     if (this.stickPointer[side] !== event.pointerId) return;
     if (side === 'right' && this.playerTank) {
       const length = Math.hypot(this.rightStick.dx, this.rightStick.dy);
-      if (length < .12) this.fireAtNearestEnemy();
+      if (length < .12 && this.apuntadoAsistido) this.fireAtNearestEnemy();
       else this.fire(this.playerTank.turretAngle);
     }
     this.stickPointer[side] = null;
@@ -1366,6 +1395,23 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     const target = enemies[0];
     this.playerTank.turretAngle = Math.atan2(target.tank.y - this.playerTank.y, target.tank.x - this.playerTank.x);
     this.fire(this.playerTank.turretAngle);
+  }
+
+  private suavizarAngulo(actual: number, objetivo: number): number {
+    const diferencia = Math.atan2(Math.sin(objetivo - actual), Math.cos(objetivo - actual));
+    const factor = 0.08 + this.sensibilidadApuntado * 0.42;
+    return actual + diferencia * factor;
+  }
+
+  private actualizarFps(): void {
+    this.fpsFrames++;
+    const ahora = performance.now();
+    const transcurrido = ahora - this.fpsDesde;
+    if (transcurrido >= 1000) {
+      this.fps = Math.round(this.fpsFrames * 1000 / transcurrido);
+      this.fpsFrames = 0;
+      this.fpsDesde = ahora;
+    }
   }
 
   @HostListener('window:keydown', ['$event'])

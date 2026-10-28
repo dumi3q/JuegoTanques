@@ -19,6 +19,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <!-- Fija la dependencia transitiva en una versión corregida para evitar NU1902/NU1903. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup>

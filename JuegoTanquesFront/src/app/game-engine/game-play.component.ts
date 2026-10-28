@@ -10,6 +10,8 @@ import { AimTrajectory } from './AimTrajectory';
 import { TANQUES_JUEGO, ARMAS_JUEGO } from '../models/game-data';
 import { ItemManager } from './ItemManager';
 import { BotAI } from './BotAI';
+import { AjustesService } from '../services/ajustes.service';
+import { FeedbackService } from '../services/feedback.service';
 
 type AbilityId = 'dash' | 'slow' | 'pierce';
 type AbilityState = 'listo' | 'armada' | 'activa' | 'recarga';
@@ -37,6 +39,7 @@ const ABILIDADES: { [tankId: string]: AbilityInfo } = {
       <div class="canvas-wrapper">
         <canvas #gameCanvas (pointermove)="onCanvasPointerMove($event)" (pointerdown)="onCanvasPointerDown($event)"></canvas>
         <button class="offline-exit" type="button" (click)="salirPartida()">SALIR ✕</button>
+        @if (mostrarFps) { <div class="fps-counter">{{ fps }} FPS</div> }
 
         @if (roundNotice) {
           <div class="round-result-overlay" role="status">
@@ -110,6 +113,7 @@ const ABILIDADES: { [tankId: string]: AbilityInfo } = {
     .round-result-card {max-width:85%;padding:16px 22px;background:rgba(7,13,27,.93);border:2px solid #ffbf24;border-radius:16px;color:#fff;font:800 clamp(17px,3.5vw,28px)/1.35 system-ui;text-align:center;box-shadow:0 10px 35px #000}
     .game-container { --background: #000000; }
     .offline-exit { position:absolute; top:16px; right:16px; z-index:40; border:1px solid #ff526f; border-radius:9px; padding:8px 13px; color:#fff; background:rgba(110,12,30,.86); font-weight:800; cursor:pointer; }
+    .fps-counter { position:absolute; top:12px; left:12px; z-index:40; padding:5px 8px; border-radius:7px; color:#8cff9b; background:rgba(0,0,0,.72); font:700 11px system-ui,sans-serif; pointer-events:none; }
     .offline-controls { position:absolute; top:16px; left:16px; z-index:20; max-width:55vw; padding:7px 10px; color:#dbe7f5; background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.15); border-radius:8px; font:11px/1.4 system-ui,sans-serif; pointer-events:none; }
     @media (max-width:700px) { .offline-controls { display:none; } }
     .canvas-wrapper {
@@ -387,12 +391,20 @@ const ABILIDADES: { [tankId: string]: AbilityInfo } = {
 })
 export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, ViewWillLeave {
   private router = inject(Router);
+  private readonly ajustesService = inject(AjustesService);
+  private readonly feedback = inject(FeedbackService);
 
   @ViewChild('gameCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
   private gameMap!: GameMap;
   public playerTank!: Tank;
   private animationFrameId: number = 0;
+  public mostrarFps = false;
+  public fps = 0;
+  private fpsFrames = 0;
+  private fpsDesde = performance.now();
+  private sensibilidadApuntado = 0.5;
+  private apuntadoAsistido = true;
 
   public itemManager = new ItemManager();
   public activeEffect: string | null = null;
@@ -448,6 +460,10 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
   private keys: { [key: string]: boolean } = {};
 
   ngOnInit() {
+    const ajustes = this.ajustesService.ajustes();
+    this.mostrarFps = ajustes.mostrarFps;
+    this.sensibilidadApuntado = ajustes.sensibilidadApuntado / 100;
+    this.apuntadoAsistido = ajustes.apuntadoAsistido;
     const canvas = this.canvasRef.nativeElement;
     this.ctx = canvas.getContext('2d')!;
     canvas.width = 1280;
@@ -844,6 +860,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
     this.currentAmmo--;
     this.updateAmmoHUD();
     this.lastAmmoConsumeTime = Date.now();
+    this.feedback.disparo(this.currentWeaponId);
 
     const barrelLength = 40;
     const startX = this.playerTank.x + Math.cos(this.playerTank.turretAngle) * barrelLength;
@@ -983,7 +1000,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
   onJoystickEnd(side: 'left' | 'right') {
     const j = side === 'left' ? this.leftJoystick : this.rightJoystick;
     if (side === 'right' && j.active) {
-      if (Math.hypot(j.stickX, j.stickY) < 10) { this.triggerAutoAimAndShot(); }
+      if (Math.hypot(j.stickX, j.stickY) < 10 && this.apuntadoAsistido) { this.triggerAutoAimAndShot(); }
       else { this.triggerShot(); }
     }
     j.active = false; j.stickX = 0; j.stickY = 0; j.vectorX = 0; j.vectorY = 0; j.identifier = null;
@@ -1012,7 +1029,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
 
     const mouseUpHandler = () => {
       if (side === 'right' && j.active) {
-        if (Math.hypot(j.stickX, j.stickY) < 10) { this.triggerAutoAimAndShot(); }
+        if (Math.hypot(j.stickX, j.stickY) < 10 && this.apuntadoAsistido) { this.triggerAutoAimAndShot(); }
         else { this.triggerShot(); }
       }
       j.active = false; j.stickX = 0; j.stickY = 0; j.vectorX = 0; j.vectorY = 0;
@@ -1053,7 +1070,10 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
     }
 
     if (this.rightJoystick.vectorX !== 0 || this.rightJoystick.vectorY !== 0) {
-      this.playerTank.turretAngle = Math.atan2(this.rightJoystick.vectorY, this.rightJoystick.vectorX);
+      this.playerTank.turretAngle = this.suavizarAngulo(
+        this.playerTank.turretAngle,
+        Math.atan2(this.rightJoystick.vectorY, this.rightJoystick.vectorX)
+      );
     }
 
     this.botAIs.forEach(bot => {
@@ -1086,6 +1106,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
             const baseDamage = bullet.isPiercing ? 50 : 34;
             const damageMultiplier = this.activeEffect === 'SOBRECARGA' ? 1.5 : 1;
             bot.tank.currentHp = Math.max(0, bot.tank.currentHp - Math.round(baseDamage * damageMultiplier));
+            this.feedback.impactoEnemigo();
           }
         });
       } else if (!this.isDashing) {
@@ -1094,6 +1115,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
           bullet.active = false;
           if (this.activeEffect !== 'ESCUDO') {
             this.playerTank.currentHp -= 20;
+            this.feedback.impactoRecibido();
             if (this.playerTank.currentHp <= 0) { this.endRound('player_dead'); }
           }
         }
@@ -1158,6 +1180,7 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
   }
 
   private startGameLoop = () => {
+    this.actualizarFps();
     this.updateGame();
     this.beginCameraFrame();
     this.gameMap.draw(this.ctx, 1280, 720);
@@ -1185,5 +1208,22 @@ export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, View
 
     this.ctx.restore(); // termina la cámara: la próxima frame inicia limpia
     this.animationFrameId = requestAnimationFrame(this.startGameLoop);
+  }
+
+  private suavizarAngulo(actual: number, objetivo: number): number {
+    const diferencia = Math.atan2(Math.sin(objetivo - actual), Math.cos(objetivo - actual));
+    const factor = 0.08 + this.sensibilidadApuntado * 0.42;
+    return actual + diferencia * factor;
+  }
+
+  private actualizarFps(): void {
+    this.fpsFrames++;
+    const ahora = performance.now();
+    const transcurrido = ahora - this.fpsDesde;
+    if (transcurrido >= 1000) {
+      this.fps = Math.round(this.fpsFrames * 1000 / transcurrido);
+      this.fpsFrames = 0;
+      this.fpsDesde = ahora;
+    }
   }
 }
