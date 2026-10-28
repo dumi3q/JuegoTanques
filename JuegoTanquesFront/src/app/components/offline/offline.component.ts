@@ -1,4 +1,4 @@
-import { Component,OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -20,6 +20,7 @@ import { JuegoStore } from '../../services/juego-store.service';
 export class OfflineComponent implements OnInit, ViewWillEnter {
   private router = inject(Router);
   private store = inject(JuegoStore);
+  private cdr = inject(ChangeDetectorRef);
   private cargaEnCurso: Promise<void> | null = null;
   config = {
     dificultad: 'normal',
@@ -76,16 +77,12 @@ export class OfflineComponent implements OnInit, ViewWillEnter {
     this.cargandoPreset = true;
     this.mensajePreset = 'Cargando equipamiento del perfil...';
 
+    // Si Inicio ya cargó el perfil, se pinta inmediatamente sin esperar otra petición.
+    this.aplicarEquipamientoDesdeStore();
+    this.actualizarVista();
+
     try {
       await this.store.cargarTodo();
-
-      // Diagnóstico: permite comprobar qué está entregando realmente el store.
-      console.log('[Offline] Estado de JuegoStore:', {
-        tanqueEquipado: this.store.tanqueEquipado(),
-        armaEquipada: this.store.armaEquipada(),
-        presetActivo: this.store.presetActivo(),
-        presets: this.store.presets()
-      });
 
       if (this.aplicarEquipamientoDesdeStore()) {
         this.mensajePreset =
@@ -110,6 +107,9 @@ export class OfflineComponent implements OnInit, ViewWillEnter {
       }
     } finally {
       this.cargandoPreset = false;
+      // Ionic puede completar este ciclo fuera de la detección de Angular en Android.
+      // Forzar el refresco evita que el equipo aparezca solamente después de tocar la pantalla.
+      this.actualizarVista();
     }
   }
 
@@ -264,14 +264,8 @@ export class OfflineComponent implements OnInit, ViewWillEnter {
     this.mensajePreset = motivo;
   }
 
-  private buscarTanquePorValor(value: unknown): Tanque | undefined {
-    const raw = String(value ?? '').trim().toUpperCase();
-    return TANQUES_JUEGO.find(t => t.tanque_id.toUpperCase() === raw || t.nombre.toUpperCase() === raw);
-  }
-
-  private buscarArmaPorValor(value: unknown): Arma | undefined {
-    const raw = String(value ?? '').trim().toUpperCase();
-    return ARMAS_JUEGO.find(a => a.arma_id.toUpperCase() === raw || a.nombre.toUpperCase() === raw);
+  private actualizarVista(): void {
+    if (!(this.cdr as ViewRef).destroyed) this.cdr.detectChanges();
   }
 
   iniciarPartidaOffline(): void {

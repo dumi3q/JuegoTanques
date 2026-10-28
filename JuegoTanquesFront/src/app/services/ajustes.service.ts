@@ -1,25 +1,19 @@
 import { Injectable, signal } from '@angular/core';
 
 export interface IAjustes {
-  volumenMusica: number;
   volumenEfectos: number;
   sensibilidadApuntado: number;
   apuntadoAsistido: boolean;
   vibracionImpacto: boolean;
-  efectosHumo: boolean;
   mostrarFps: boolean;
-  calidadGrafica: string;
 }
 
 export const AJUSTES_POR_DEFECTO: IAjustes = {
-  volumenMusica: 75,
   volumenEfectos: 90,
   sensibilidadApuntado: 50,
   apuntadoAsistido: true,
   vibracionImpacto: true,
-  efectosHumo: true,
   mostrarFps: false,
-  calidadGrafica: 'alta',
 };
 
 // Guarda los ajustes en el dispositivo. El juego los lee de "ajustes()" cuando
@@ -33,9 +27,10 @@ export class AjustesService {
   readonly ajustes = signal<IAjustes>(this.leer());
 
   guardar(ajustes: IAjustes): void {
-    this.ajustes.set({ ...ajustes });
+    const ajustesValidos = this.normalizar(ajustes);
+    this.ajustes.set(ajustesValidos);
     try {
-      localStorage.setItem(this.clave, JSON.stringify(ajustes));
+      localStorage.setItem(this.clave, JSON.stringify(ajustesValidos));
     } catch {
       // Si el almacenamiento está bloqueado, los ajustes valen solo mientras la app esté abierta
     }
@@ -50,9 +45,23 @@ export class AjustesService {
   private leer(): IAjustes {
     try {
       const texto = localStorage.getItem(this.clave);
-      return texto ? { ...AJUSTES_POR_DEFECTO, ...JSON.parse(texto) } : { ...AJUSTES_POR_DEFECTO };
+      return texto ? this.normalizar(JSON.parse(texto)) : { ...AJUSTES_POR_DEFECTO };
     } catch {
       return { ...AJUSTES_POR_DEFECTO };
     }
+  }
+
+  private normalizar(valor: Partial<IAjustes> | null | undefined): IAjustes {
+    const numero = (dato: unknown, defecto: number, minimo: number, maximo: number) => {
+      const n = Number(dato);
+      return Number.isFinite(n) ? Math.min(maximo, Math.max(minimo, n)) : defecto;
+    };
+    return {
+      volumenEfectos: numero(valor?.volumenEfectos, AJUSTES_POR_DEFECTO.volumenEfectos, 0, 100),
+      sensibilidadApuntado: numero(valor?.sensibilidadApuntado, AJUSTES_POR_DEFECTO.sensibilidadApuntado, 10, 100),
+      apuntadoAsistido: typeof valor?.apuntadoAsistido === 'boolean' ? valor.apuntadoAsistido : AJUSTES_POR_DEFECTO.apuntadoAsistido,
+      vibracionImpacto: typeof valor?.vibracionImpacto === 'boolean' ? valor.vibracionImpacto : AJUSTES_POR_DEFECTO.vibracionImpacto,
+      mostrarFps: typeof valor?.mostrarFps === 'boolean' ? valor.mostrarFps : AJUSTES_POR_DEFECTO.mostrarFps,
+    };
   }
 }

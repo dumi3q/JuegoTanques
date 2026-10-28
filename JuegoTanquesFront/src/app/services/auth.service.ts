@@ -76,7 +76,6 @@ export class AuthService {
     }
 
     localStorage.setItem(this.claveSesion, JSON.stringify(sesion));
-    sessionStorage.setItem(this.claveSesion, JSON.stringify(sesion));
     return true;
   }
 
@@ -109,7 +108,6 @@ export class AuthService {
   }
   cerrarSesion(): void {
     localStorage.removeItem(this.claveSesion);
-    sessionStorage.removeItem(this.claveSesion);
   }
 
   private leerSesionAlmacenada(): ISesionRespuesta | null {
