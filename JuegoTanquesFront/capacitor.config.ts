@@ -7,6 +7,10 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: 'https'
   },
+  android: {
+    // 🟢 Esto le indica a Android que permita contenido mixto/tráfico web seguro e inseguro si lo requiere el túnel
+    allowMixedContent: true
+  },
   plugins: {
     ScreenOrientation: {
       // Configuración por si usas el plugin de orientación de Capacitor

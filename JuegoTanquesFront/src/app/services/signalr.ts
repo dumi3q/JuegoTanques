@@ -113,11 +113,8 @@ export class SignalrService {
 
     console.log('🔍 [SignalR] Token extraído y limpio:', token ? 'SÍ EXISTE 🟢 (Longitud: ' + token.length + ')' : 'NO EXISTE 🔴');
 
-    const baseUrl = environment.baseUrl.replace('/api', '');
-    const hubUrl = `${baseUrl}/salasHub`;
-
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(hubUrl, {
+      .withUrl(environment.hubUrl, {
         // Pasamos el token puro y limpio exclusivamente mediante la factoría estándar
         accessTokenFactory: () => token,
         transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling

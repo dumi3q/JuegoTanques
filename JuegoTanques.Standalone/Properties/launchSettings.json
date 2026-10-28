@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "SmartAppControl": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Users\\evans\\source\\repos\\JuegoTanques\\JuegoTanques.Standalone\\artifacts\\api-single-file\\JuegoTanques.Server.exe",
+      "workingDirectory": "C:\\Users\\evans\\source\\repos\\JuegoTanques\\JuegoTanques.Standalone\\artifacts\\api-single-file",
+      "commandLineArgs": "--urls http://localhost:5140",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

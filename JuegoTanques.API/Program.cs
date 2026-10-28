@@ -38,19 +38,20 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("PermitirIonic", policy =>
+    options.AddPolicy("IonicApp", policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:8000", "https://localhost:8000",
-                "http://localhost:8100", "https://localhost:8100",
-                "http://localhost:8101", "https://localhost:8101"
-              )
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+        policy
+            .WithOrigins(
+                "https://localhost",
+                "http://localhost",
+                "capacitor://localhost",
+                "http://localhost:8100"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
-
 builder.Services.AddScoped<ICorreoServicio, CorreoServicio>();
 builder.Services.AddSingleton<JwtServicio>();
 builder.Services.AddScoped<AuthServicio>();
@@ -60,13 +61,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         opciones.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Emisor"],
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audiencia"],
+            ValidateIssuer = false,
+            ValidateAudience = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Clave"]!)),
+                Encoding.UTF8.GetBytes("MiClaveSuperSecretaParaJuegoDeTanques2026_SecureKey!")),
             ValidateLifetime = true
         };
 
@@ -106,8 +105,14 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseCors("PermitirIonic");
-app.UseHttpsRedirection();
+app.UseCors("IonicApp");
+
+
+//if (!app.Environment.IsDevelopment())
+//{
+  //  app.UseHttpsRedirection();
+//}
+
 
 app.UseAuthentication();
 app.UseAuthorization();

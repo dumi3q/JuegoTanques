@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>JuegoTanques.Server</AssemblyName>
+    <RootNamespace>JuegoTanques</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <SmartAppPublishDir>$(MSBuildProjectDirectory)\artifacts\api-single-file\</SmartAppPublishDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\JuegoTanques.API\**\*.cs"
+             Exclude="..\JuegoTanques.API\bin\**;..\JuegoTanques.API\obj\**" />
+    <Compile Include="..\JuegoTanques.AccesoDatos\**\*.cs"
+             Exclude="..\JuegoTanques.AccesoDatos\bin\**;..\JuegoTanques.AccesoDatos\obj\**" />
+    <Compile Include="..\JuegoTanques.Dominio\**\*.cs"
+             Exclude="..\JuegoTanques.Dominio\bin\**;..\JuegoTanques.Dominio\obj\**" />
+    <Compile Include="..\JuegoTanques.LogicaNegocio\**\*.cs"
+             Exclude="..\JuegoTanques.LogicaNegocio\bin\**;..\JuegoTanques.LogicaNegocio\obj\**" />
+    <Compile Include="..\JuegoTanques.Utilitarios\**\*.cs"
+             Exclude="..\JuegoTanques.Utilitarios\bin\**;..\JuegoTanques.Utilitarios\obj\**" />
+
+    <Content Include="..\JuegoTanques.API\appsettings.json">
+      <Link>appsettings.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\JuegoTanques.API\appsettings.Development.json">
+      <Link>appsettings.Development.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.2.0" />
+    <PackageReference Include="LinqKit" Version="1.3.11" />
+    <PackageReference Include="LinqKit.Core" Version="1.2.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="NLog" Version="6.2.1" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="6.2.1" />
+  </ItemGroup>
+
+  <!--
+    Smart App Control blocks the ordinary multi-DLL debug output. After each
+    real build, publish the same compiled assembly as a single executable that
+    Visual Studio can launch through the SmartAppControl profile.
+  -->
+  <Target Name="PublishForSmartAppControl"
+          AfterTargets="Build"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipSmartAppPublish)' != 'true'">
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Targets="Publish"
+             Properties="Configuration=$(Configuration);RuntimeIdentifier=win-x64;SelfContained=false;PublishSingleFile=true;NoBuild=true;SkipSmartAppPublish=true;PublishDir=$(SmartAppPublishDir)" />
+  </Target>
+
+</Project>

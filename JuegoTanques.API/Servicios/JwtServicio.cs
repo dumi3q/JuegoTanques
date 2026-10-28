@@ -16,8 +16,7 @@ public class JwtServicio
 
     public string Generar(int usuarioId, string username, string rol)
     {
-        var clave = _config["Jwt:Clave"]
-            ?? throw new InvalidOperationException("Falta 'Jwt:Clave' en appsettings.json");
+        var clave = _config["Jwt:Clave"] ?? "MiClaveSuperSecretaParaJuegoDeTanques2026_SecureKey!";
         var horas = int.TryParse(_config["Jwt:HorasValidez"], out var h) ? h : 72;
 
         var llave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clave));
@@ -31,7 +30,7 @@ public class JwtServicio
                 new Claim(ClaimTypes.Role, rol)
             }),
             Expires = DateTime.UtcNow.AddHours(horas),
-            Issuer = _config["Jwt:Emisor"],
+            Issuer = _config["Jwt:Emisor"] ?? "JuegoTanques",
             Audience = _config["Jwt:Audiencia"],
             SigningCredentials = new SigningCredentials(llave, SecurityAlgorithms.HmacSha256)
         };
