@@ -2,8 +2,9 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
+import { ViewWillEnter } from '@ionic/angular';
 import { TANQUES_JUEGO, ARMAS_JUEGO } from '../../models/game-data';
-
 import {
   IonContent, IonButton, IonIcon, IonRange,
   IonBadge
@@ -26,7 +27,7 @@ import { personOutline, peopleOutline, playOutline } from 'ionicons/icons';
   templateUrl: './offline.component.html',
   styleUrls: ['./offline.component.scss'],
 })
-export class OfflineComponent {
+export class OfflineComponent implements ViewWillEnter {
 
   private router = inject(Router);
 
@@ -45,17 +46,17 @@ export class OfflineComponent {
     });
   }
 
-  iniciarPartidaOffline() {
-    console.log('Iniciando partida offline con configuración:', this.config);
+  async ionViewWillEnter(): Promise<void> {
+    try {
+      await ScreenOrientation.lock({ orientation: 'portrait' });
+    } catch (e) { }
+  }
 
-    // Generar la lista de bots con tanques y armas aleatorias de los catálogos
+  iniciarPartidaOffline() {
     const botsConfigurados = [];
 
     for (let i = 0; i < this.config.numBots; i++) {
-      // Seleccionar un tanque aleatorio de los disponibles en TANQUES_JUEGO
       const tanqueAleatorio = TANQUES_JUEGO[Math.floor(Math.random() * TANQUES_JUEGO.length)];
-
-      // Seleccionar un arma aleatoria de ARMAS_JUEGO
       const armaAleatoria = ARMAS_JUEGO[Math.floor(Math.random() * ARMAS_JUEGO.length)];
 
       botsConfigurados.push({
@@ -66,9 +67,6 @@ export class OfflineComponent {
       });
     }
 
-    console.log('Bots generados para la partida:', botsConfigurados);
-
-    // Navegar al juego pasando los datos por State
     this.router.navigate(['/game'], {
       state: {
         config: this.config,

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
+import { ViewWillEnter } from '@ionic/angular';
 import {
   IonContent, IonInput, IonButton, IonChip, IonLabel, IonItem
 } from '@ionic/angular';
@@ -18,30 +20,32 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss'],
 })
-export class SignupComponent {
+export class SignupComponent implements ViewWillEnter {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  // Campos del formulario
   nombre = '';
   correo = '';
   contrasena = '';
 
-  // Paso 2: código que llega al correo
   verificarCorreo = false;
   codigoOtp = '';
 
-  // Estado de la pantalla
   error = '';
   mensaje = '';
   codigoDesarrollo = '';
   cargando = false;
   sugerenciasNombres: string[] = [];
 
-  // ---------- Paso 1: crear la cuenta y pedir el código ----------
+  async ionViewWillEnter(): Promise<void> {
+    try {
+      await ScreenOrientation.lock({ orientation: 'portrait' });
+    } catch (e) { }
+  }
+
   registrar(): void {
-    if (this.cargando) return; // evita enviar dos veces
+    if (this.cargando) return;
 
     this.nombre = this.nombre.trim();
     this.correo = this.correo.trim();
@@ -82,14 +86,12 @@ export class SignupComponent {
     });
   }
 
-  // Toca un nombre sugerido y se pone solo en el campo
   usarSugerencia(sugerencia: string): void {
     this.nombre = sugerencia;
     this.sugerenciasNombres = [];
     this.error = '';
   }
 
-  // ---------- Paso 2: confirmar el código ----------
   confirmarCorreo(): void {
     if (this.cargando) return;
 
@@ -116,7 +118,6 @@ export class SignupComponent {
         }
         this.cargando = false;
         this.actualizarPantalla();
-        // Cuenta creada y sesión iniciada: al menú principal
         void this.router.navigateByUrl('/home');
       },
       error: (e: HttpErrorResponse) => {
@@ -148,7 +149,6 @@ export class SignupComponent {
     });
   }
 
-  // Si el correo estaba mal escrito, vuelve al formulario
   volverAlFormulario(): void {
     this.verificarCorreo = false;
     this.codigoOtp = '';
@@ -161,10 +161,9 @@ export class SignupComponent {
     void this.router.navigate(['/login']);
   }
 
-  // Muestra el mensaje de error de la API (y los nombres sugeridos si vienen)
   private mostrarError(e: HttpErrorResponse, porDefecto: string): void {
     if (e.status === 0) {
-      this.error = 'No se pudo conectar con el servidor. Revisa que la API esté corriendo y la dirección de environment.ts.';
+      this.error = 'No se pudo conectar con el servidor. Revisa que la API esté corriendo.';
       return;
     }
     this.error = e.error?.error || porDefecto;
@@ -173,8 +172,6 @@ export class SignupComponent {
     }
   }
 
-  // Fuerza a Angular a redibujar la pantalla con los valores nuevos
-  // (así no depende de zone.js para mostrar el paso del código, los errores o los botones)
   private actualizarPantalla(): void {
     this.cdr.detectChanges();
   }

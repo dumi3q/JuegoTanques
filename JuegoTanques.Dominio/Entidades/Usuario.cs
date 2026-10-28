@@ -31,4 +31,6 @@ public partial class Usuario
     public virtual ICollection<InventarioTanque> InventarioTanques { get; set; } = new List<InventarioTanque>();
 
     public virtual Role Rol { get; set; } = null!;
+
+    public string? FotoPerfil { get; set; }
 }

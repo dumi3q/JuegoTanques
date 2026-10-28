@@ -7,7 +7,7 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular';
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
-import { authInterceptor } from './app/interceptors/auth.interceptor';
+import { authInterceptor } from './app/services/auth.interceptor';
 
 bootstrapApplication(AppComponent, {
   providers: [

@@ -15,6 +15,7 @@ export const routes: Routes = [
   { path: 'offline', loadComponent: () => import('./components/offline/offline.component').then(m => m.OfflineComponent), canActivate: [authGuard] },
   { path: 'store', loadComponent: () => import('./components/tienda/tienda.component').then(m => m.TiendaComponent), canActivate: [authGuard] },
   { path: 'salas', loadComponent: () => import('./components/salas/salas.component').then(m => m.SalasComponent), canActivate: [authGuard] },
+  { path: 'sala-espera', loadComponent: () => import('./components/sala-espera/sala-espera.component').then(m => m.SalaEsperaComponent), canActivate: [authGuard] },
   { path: 'ranking', loadComponent: () => import('./components/ranking/ranking.component').then(m => m.RankingComponent), canActivate: [authGuard] },
   { path: 'perfil', loadComponent: () => import('./components/perfil/perfil.component').then(m => m.PerfilComponent), canActivate: [authGuard] },
   { path: 'settings', loadComponent: () => import('./components/settings/settings.component').then(m => m.SettingsComponent), canActivate: [authGuard] },

@@ -100,7 +100,6 @@ export class AuthService {
   tieneSesionValida(): boolean {
     return this.obtenerSesion() !== null;
   }
-
   tokenExpirado(token: string): boolean {
     const expiracion = this.obtenerExpiracion(token);
     if (expiracion === null) {
@@ -108,7 +107,6 @@ export class AuthService {
     }
     return Date.now() >= expiracion * 1000;
   }
-
   cerrarSesion(): void {
     localStorage.removeItem(this.claveSesion);
     sessionStorage.removeItem(this.claveSesion);

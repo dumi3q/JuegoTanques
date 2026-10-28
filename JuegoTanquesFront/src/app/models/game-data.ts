@@ -70,7 +70,7 @@ export const TANQUES_JUEGO: Tanque[] = [
     velocidad_base: 6,
     blindaje: 50,
     precio: 1200,
-    imagenTienda: 'assets/imgs/tanques/vanguad.png',
+    imagenTienda: 'assets/imgs/tanques/vanguard.png',
     imagenJuego: 'assets/imgs/tanques/vanguardTopdown.png',
     habilidades: ['Munición Perforante (Traspasa Muros)', 'Sobrecarga de Motor', 'Escudo Táctico']
   }

@@ -73,21 +73,33 @@
           <div class="welcome-banner">
             <img src="assets/imgs/header.jpg" alt="Encabezado Tanques" class="banner-img" />
             <div class="banner-overlay">
-              <h2>¡Bienvenido al Comando, Soldado!</h2>
+              <h2>¡Bienvenido al Comando, {{ store.resumen()?.nombre || 'Soldado' }}!</h2>
               <p>Aquí tienes un resumen rápido de tu estado en el frente.</p>
             </div>
           </div>
 
           <div class="ion-padding">
-            <ion-grid class="dashboard-grid">
+
+            <!-- Si falló la conexión, se avisa y se puede reintentar -->
+            <div *ngIf="store.error()" style="text-align: center; margin-bottom: 12px;">
+              <p style="color: #ff4961; font-size: 14px; margin: 0 0 8px 0;">{{ store.error() }}</p>
+              <ion-button size="small" fill="outline" color="danger" (click)="reintentar()">Reintentar</ion-button>
+            </div>
+
+            <p *ngIf="store.cargando() && !store.resumen()" style="text-align: center; opacity: 0.7;">Cargando tus datos…</p>
+
+            <ion-grid class="dashboard-grid" *ngIf="store.resumen() as r">
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <ion-card class="stat-card">
                     <ion-card-header>
                       <ion-card-subtitle>Nivel de Tanque</ion-card-subtitle>
-                      <ion-card-title>Nivel 1</ion-card-title>
+                      <ion-card-title>Nivel {{ r.nivel }}</ion-card-title>
                     </ion-card-header>
-                    <ion-card-content>Experiencia actual: 0 / 1000 XP</ion-card-content>
+                    <ion-card-content>
+                      Experiencia actual: {{ r.experiencia }} / {{ r.experienciaSiguienteNivel }} XP
+                      <ion-progress-bar [value]="store.xpPorcentaje() / 100" color="warning" style="margin-top: 8px;"></ion-progress-bar>
+                    </ion-card-content>
                   </ion-card>
                 </ion-col>
 
@@ -95,9 +107,11 @@
                   <ion-card class="stat-card">
                     <ion-card-header>
                       <ion-card-subtitle>Estadísticas de Batalla</ion-card-subtitle>
-                      <ion-card-title>0 Victorias / 0 Derrotas</ion-card-title>
+                      <ion-card-title>{{ r.victorias }} Victorias / {{ r.derrotas }} Derrotas</ion-card-title>
                     </ion-card-header>
-                    <ion-card-content>Ratio K/D: 0.0</ion-card-content>
+                    <ion-card-content>
+                      Partidas jugadas: {{ r.partidas }} · Tanques destruidos: {{ r.tanquesDestruidos }}
+                    </ion-card-content>
                   </ion-card>
                 </ion-col>
 
@@ -105,7 +119,7 @@
                   <ion-card class="stat-card">
                     <ion-card-header>
                       <ion-card-subtitle>Monedas del Servidor</ion-card-subtitle>
-                      <ion-card-title>🪙 500 Monedas</ion-card-title>
+                      <ion-card-title>🪙 {{ r.monedas }} Monedas</ion-card-title>
                     </ion-card-header>
                     <ion-card-content>Listas para gastar en la tienda.</ion-card-content>
                   </ion-card>
@@ -115,9 +129,11 @@
                   <ion-card class="stat-card">
                     <ion-card-header>
                       <ion-card-subtitle>Estado del Servidor</ion-card-subtitle>
-                      <ion-card-title class="server-online">🟢 Conectado (.NET API)</ion-card-title>
+                      <ion-card-title class="server-online">
+                        {{ store.conectado() ? '🟢 Conectado (.NET API)' : '🔴 Sin conexión' }}
+                      </ion-card-title>
                     </ion-card-header>
-                    <ion-card-content>Puerto 7123 activo y sincronizado.</ion-card-content>
+                    <ion-card-content>{{ urlServidor }}</ion-card-content>
                   </ion-card>
                 </ion-col>
               </ion-row>

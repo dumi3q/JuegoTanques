@@ -1,7 +1,8 @@
 import { Component, ElementRef, OnInit, OnDestroy, HostListener, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { IonContent } from '@ionic/angular';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
+import { IonContent, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 import { GameMap } from './GameMap';
 import { Tank } from './Tank';
 import { Bullet } from './Bullet';
@@ -269,7 +270,7 @@ const ABILIDADES: { [tankId: string]: AbilityInfo } = {
     }
   `]
 })
-export class GamePlayComponent implements OnInit, OnDestroy {
+export class GamePlayComponent implements OnInit, OnDestroy, ViewWillEnter, ViewWillLeave {
   private router = inject(Router);
 
   @ViewChild('gameCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
@@ -286,15 +287,15 @@ export class GamePlayComponent implements OnInit, OnDestroy {
   // ===== HABILIDAD ESPECIAL =====
   public ability: AbilityInfo = ABILIDADES['TANK-01'];
   public abilityState: AbilityState = 'listo';
-  public abilityCooldown: number = 0;     // segundos que faltan para recargar
-  public abilityActiveLeft: number = 0;   // segundos que faltan de efecto activo
-  public abilityProgress: number = 100;   // 0 a 100, para el anillo del botón
+  public abilityCooldown: number = 0;
+  public abilityActiveLeft: number = 0;
+  public abilityProgress: number = 100;
   private abilityReadyAt: number = 0;
   private abilityActiveUntil: number = 0;
 
-  private readonly DASH_SPEED = 3.5;   // multiplicador de velocidad durante el dash
-  private readonly SLOW_RADIUS = 170;  // tamaño de la zona de ralentización
-  private readonly SLOW_FACTOR = 0.35; // los bots se mueven al 35% de su velocidad
+  private readonly DASH_SPEED = 3.5;
+  private readonly SLOW_RADIUS = 170;
+  private readonly SLOW_FACTOR = 0.35;
 
   private dashDirX: number = 0;
   private dashDirY: number = 0;
@@ -340,13 +341,33 @@ export class GamePlayComponent implements OnInit, OnDestroy {
       this.rawBotsConfig = state.bots || [];
     }
 
-    const tankData = TANQUES_JUEGO[0]; // 0 = Scout, 1 = Juggernaut, 2 = Vanguardia
+    const tankData = TANQUES_JUEGO[0];
     this.playerTank = new Tank(180, 360, tankData, true);
     this.ability = ABILIDADES[tankData.tanque_id];
+
+    // Inicializar el mapa de juego de forma segura
+    const mapaId = this.normalizarMapaId(this.gameConfig?.mapaSeleccionado);
+    this.gameMap = new GameMap(mapaId);
 
     this.initNewRound();
     this.setWeapon('WEAP-03');
     this.startGameLoop();
+  }
+
+  async ionViewWillEnter() {
+    try {
+      // 🟢 Al entrar a la partida, la pantalla gira automáticamente a horizontal
+      await ScreenOrientation.lock({ orientation: 'landscape' });
+    } catch (e) {
+      console.log('Orientación no soportada en navegador web');
+    }
+  }
+
+  async ionViewWillLeave() {
+    try {
+      // 🟢 Al salir de la partida y regresar a los menús, vuelve a vertical
+      await ScreenOrientation.lock({ orientation: 'portrait' });
+    } catch (e) { }
   }
 
   ngOnDestroy() {
@@ -398,7 +419,7 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     }
     return { x: 950, y: 360 };
   }
-  // 'map1' -> 'mapa_1', 'mapa_2' -> 'mapa_2'. Si no entiende el valor, usa mapa_3.
+
   private normalizarMapaId(valor: string | undefined): string {
     const numero = (valor ?? '').match(/\d+/)?.[0];
     return numero && ['1', '2', '3'].includes(numero) ? `mapa_${numero}` : 'mapa_3';
@@ -424,18 +445,16 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     this.initNewRound();
   }
 
-  // ===================== HABILIDAD ESPECIAL =====================
   public onAbilityPress(event: Event) {
     event.preventDefault();
     this.useSpecialAbility();
   }
 
   public useSpecialAbility() {
-    if (this.abilityState !== 'listo') return; // solo se usa cuando está lista
+    if (this.abilityState !== 'listo') return;
     const now = Date.now();
 
     if (this.ability.id === 'dash') {
-      // La dirección del dash es hacia donde te estás moviendo
       let dx = this.leftJoystick.vectorX;
       let dy = this.leftJoystick.vectorY;
       if (dx === 0 && dy === 0) {
@@ -444,7 +463,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
         if (this.keys['a'] || this.keys['arrowleft']) dx -= 1;
         if (this.keys['d'] || this.keys['arrowright']) dx += 1;
       }
-      // Si no te mueves, el dash va hacia donde mira el tanque
       if (dx === 0 && dy === 0) {
         dx = Math.cos(this.playerTank.angle);
         dy = Math.sin(this.playerTank.angle);
@@ -455,7 +473,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
       this.beginActive(now);
 
     } else if (this.ability.id === 'slow') {
-      // Crea una zona en el piso donde estás parado
       this.slowZone = {
         x: this.playerTank.x,
         y: this.playerTank.y,
@@ -465,7 +482,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
       this.beginActive(now);
 
     } else {
-      // Perforante: queda "armada" hasta que dispares
       this.perforanteArmed = true;
       this.abilityState = 'armada';
     }
@@ -491,7 +507,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     this.slowZone = null;
   }
 
-  // Se llama en cada frame para actualizar los estados y los contadores
   private updateAbility(now: number) {
     if (this.abilityState === 'activa') {
       this.abilityActiveLeft = Math.max(0, Math.ceil((this.abilityActiveUntil - now) / 1000));
@@ -517,7 +532,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     return this.abilityState === 'activa' && this.ability.id === 'dash';
   }
 
-  // Texto que se ve dentro del botón
   public get abilityLabel(): string {
     switch (this.abilityState) {
       case 'recarga': return this.abilityCooldown + 's';
@@ -544,7 +558,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     this.ctx.restore();
   }
 
-  // ===================== ARMAS Y POWER-UPS =====================
   public setWeapon(weaponId: string) {
     this.currentWeaponId = weaponId;
     if (weaponId === 'WEAP-03') { this.maxAmmo = 2; this.reloadTimePerAmmo = 1400; }
@@ -606,12 +619,11 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     const startX = this.playerTank.x + Math.cos(this.playerTank.turretAngle) * barrelLength;
     const startY = this.playerTank.y + Math.sin(this.playerTank.turretAngle) * barrelLength;
 
-    // ¿La habilidad Perforante está armada? Entonces ESTA bala es la especial
     let piercing = false;
     if (this.perforanteArmed) {
       piercing = true;
       this.perforanteArmed = false;
-      this.startCooldown(Date.now()); // la recarga empieza al disparar
+      this.startCooldown(Date.now());
     }
 
     if (this.currentWeaponId === 'WEAP-01') {
@@ -627,7 +639,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ===================== CONTROLES =====================
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
     this.keys[event.key.toLowerCase()] = true;
@@ -712,7 +723,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     window.addEventListener('mouseup', mouseUpHandler);
   }
 
-  // ===================== BUCLE DEL JUEGO =====================
   private updateGame() {
     const now = Date.now();
     this.updateAbility(now);
@@ -733,7 +743,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     }
 
     if (this.isDashing) {
-      // Durante el dash te mueves rápido en la dirección guardada
       this.playerTank.move(this.dashDirX * this.DASH_SPEED, this.dashDirY * this.DASH_SPEED, this.gameMap, 1280, 720);
     } else if (dx !== 0 || dy !== 0) {
       this.playerTank.move(dx, dy, this.gameMap, 1280, 720);
@@ -743,7 +752,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
       this.playerTank.turretAngle = Math.atan2(this.rightJoystick.vectorY, this.rightJoystick.vectorX);
     }
 
-    // Zona de ralentización: los bots dentro de ella se mueven más lento
     this.botAIs.forEach(bot => {
       const inside = this.slowZone
         ? Math.hypot(bot.tank.x - this.slowZone.x, bot.tank.y - this.slowZone.y) < this.slowZone.radius
@@ -766,7 +774,7 @@ export class GamePlayComponent implements OnInit, OnDestroy {
           const dist = Math.hypot(bullet.x - bot.tank.x, bullet.y - bot.tank.y);
           if (dist < 35) { bullet.active = false; bot.tank.currentHp -= 34; }
         });
-      } else if (!this.isDashing) { // durante el dash las balas enemigas no te pegan
+      } else if (!this.isDashing) {
         const dist = Math.hypot(bullet.x - this.playerTank.x, bullet.y - this.playerTank.y);
         if (dist < 35) {
           bullet.active = false;
@@ -822,7 +830,6 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     this.gameMap.draw(this.ctx, 1280, 720);
 
     this.drawSlowZone();
-
     this.itemManager.draw(this.ctx);
 
     this.playerTank.draw(this.ctx, this.activeEffect);
@@ -842,8 +849,7 @@ export class GamePlayComponent implements OnInit, OnDestroy {
         this.gameMap, 1280, 720
       );
     }
-    this.setWeapon('WEAP-02');
 
-
+    this.animationFrameId = requestAnimationFrame(this.startGameLoop);
   }
 }
