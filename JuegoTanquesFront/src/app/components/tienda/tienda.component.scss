@@ -2,207 +2,295 @@
   display: block;
   height: 100%;
   width: 100%;
+  min-width: 0;
 }
 
-/* Fondo con la imagen del Hangar */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 .hangar-bg {
-  --background: url('/assets/imgs/hangar.jpg') no-repeat center center / cover !important;
+  --background: url('/assets/imgs/hangar.jpg') no-repeat center center / cover;
 }
 
 .tienda-container {
+  width: 100%;
+  min-height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-  min-height: 100%;
-  width: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-  gap: 20px;
+  padding: 14px 8px;
 }
 
-/* Botones laterales de navegación estilo flecha */
+.shop-layout {
+  position: relative;
+  width: min(100%, 570px);
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 32px minmax(0,1fr) 32px;
+  align-items: center;
+  gap: 5px;
+}
+
 .nav-btn {
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-  width: 55px;
-  height: 80px;
-  border-radius: 14px;
+  appearance: none;
+  background: rgba(0,0,0,.72);
+  border: 1px solid rgba(255,255,255,.25);
+  color: #fff;
+  width: 32px;
+  height: 58px;
+  border-radius: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0;
   cursor: pointer;
+  z-index: 2;
   backdrop-filter: blur(10px);
-  transition: all 0.2s ease;
-  z-index: 20;
 
   ion-icon {
-    font-size: 36px;
-    color: #ffffff;
-  }
-
-  &:hover {
-    background: rgba(217, 119, 6, 0.9);
-    border-color: #fbbf24;
-    transform: scale(1.08);
+    font-size: 24px;
   }
 
   &:active {
-    transform: scale(0.95);
+    transform: scale(.95);
+    background: #b45309;
   }
 }
 
-/* Tarjeta Glassmorphism central de la tienda */
 .glass-shop-card {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background: rgba(15, 15, 15, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-top: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 28px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+  min-width: 0;
   width: 100%;
   max-width: 440px;
-  padding: 24px;
-  color: #ffffff;
+  margin: auto;
+  padding: clamp(12px,3vw,22px);
   text-align: center;
-  z-index: 10;
+  color: #fff;
+  background: rgba(15,15,15,.81);
+  border: 1px solid rgba(255,255,255,.22);
+  border-top-color: rgba(255,255,255,.35);
+  border-radius: 23px;
+  box-shadow: 0 20px 45px rgba(0,0,0,.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-/* Selector de categoría (Tanques / Armas) */
 .category-selector {
   display: flex;
-  background: rgba(255, 255, 255, 0.06);
+  width: 100%;
+  min-width: 0;
+  gap: 3px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
   border-radius: 12px;
   padding: 4px;
-  margin-bottom: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 10px;
 
   button {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 9px 3px;
     background: transparent;
-    border: none;
-    color: #aaa;
-    font-weight: 700;
-    font-size: 0.85rem;
-    padding: 8px 0;
+    color: #bbb;
+    border: 0;
     border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    font-weight: 750;
+    font-size: clamp(.75rem,3vw,.88rem);
+  }
 
-    &.active {
+    button.active {
       background: #d97706;
       color: #fff;
-      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
+      box-shadow: 0 4px 12px rgba(217,119,6,.35);
     }
-  }
+}
+
+.coins-display {
+  color: #ffc409;
+  font-size: .85rem;
+  margin: 7px 0 2px;
+}
+
+.shop-message {
+  color: #ddd;
+  font-size: .78rem;
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+
+.shop-error {
+  color: #ff4961;
+  font-size: .78rem;
+  margin: 4px 0;
+  overflow-wrap: anywhere;
 }
 
 .card-header {
-  margin-bottom: 10px;
+  margin: 8px 0;
 
   .category-badge {
-    background: rgba(217, 119, 6, 0.3);
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 18px;
+    font-size: .73rem;
+    background: rgba(217,119,6,.3);
     color: #fbbf24;
-    border: 1px solid rgba(217, 119, 6, 0.5);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
+    border: 1px solid rgba(217,119,6,.5);
+    font-weight: 650;
   }
 
   h2 {
-    font-size: 1.6rem;
+    font-size: clamp(1.15rem,5vw,1.7rem);
     font-weight: 800;
-    margin: 8px 0 0 0;
-    color: #ffffff;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    line-height: 1.22;
+    margin: 7px 0 0;
+    overflow-wrap: anywhere;
+    color: #fff;
   }
 }
 
-/* Vista previa del tanque / arma */
 .tank-preview {
-  height: 150px;
+  height: clamp(115px, 25vh, 190px);
+  width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin: 10px 0;
+  justify-content: center;
+  margin: 8px 0;
 
-  .tank-image {
-    max-height: 100%;
-    max-width: 100%;
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8));
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,.7));
   }
 }
 
 .skills-preview {
-  margin-bottom: 14px;
   color: #fbbf24;
-  font-size: 0.78rem;
+  font-size: .79rem;
   font-weight: 600;
-  padding: 0 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding: 0 2px;
+  margin-bottom: 12px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
 }
 
-/* Atributos / Progress bars */
 .stats-container {
-  margin-bottom: 20px;
   text-align: left;
+  margin-bottom: 12px;
 
   .stat-item {
     margin-bottom: 10px;
+  }
 
-    .stat-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      margin-bottom: 4px;
-      color: #dddddd;
-      font-weight: 600;
+  .stat-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: #ddd;
+    font-size: clamp(.74rem,3.1vw,.88rem);
+    font-weight: 600;
+    margin-bottom: 5px;
+
+    span:first-child {
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
 
-    ion-progress-bar {
-      height: 8px;
-      border-radius: 4px;
+    span:last-child {
+      flex: 0 0 auto;
     }
+  }
+
+  ion-progress-bar {
+    display: block;
+    height: 7px;
+    border-radius: 4px;
   }
 }
 
-/* Botón de acción */
+.card-actions {
+  width: 100%;
+}
+
 .action-btn {
   --background: #d97706;
   --background-hover: #b45309;
-  --border-radius: 14px;
-  height: 48px;
+  --border-radius: 12px;
+  margin: 0;
+  width: 100%;
+  min-height: 46px;
+  font-size: .9rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
 }
 
-/* Indicadores de puntos */
 .dots-indicator {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 12px;
 
   span {
-    width: 8px;
-    height: 8px;
+    display: block;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255,255,255,.3);
     cursor: pointer;
-    transition: all 0.2s ease;
+  }
 
-    &.active {
+    span.active {
+      width: 21px;
+      border-radius: 5px;
       background: #d97706;
-      width: 20px;
-      border-radius: 4px;
     }
+}
+
+@media (min-width: 600px) {
+  .shop-layout {
+    grid-template-columns: 54px minmax(0,1fr) 54px;
+    gap: 14px;
+  }
+
+  .nav-btn {
+    width: 54px;
+    height: 80px;
+
+    ion-icon {
+      font-size: 34px;
+    }
+  }
+}
+
+@media (max-width: 350px) {
+  .shop-layout {
+    grid-template-columns: 25px minmax(0,1fr) 25px;
+    gap: 3px;
+  }
+
+  .nav-btn {
+    width: 25px;
+    height: 52px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+
+  .glass-shop-card {
+    padding: 10px;
+    border-radius: 17px;
+  }
+}
+
+@media (max-height: 680px) {
+  .tienda-container {
+    align-items: flex-start;
+  }
+
+  .tank-preview {
+    height: 108px;
   }
 }

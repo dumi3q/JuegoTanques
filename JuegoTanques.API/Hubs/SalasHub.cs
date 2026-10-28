@@ -91,7 +91,7 @@ namespace JuegoTanques.API.Hubs
         {
             var publicado = disparo with { UsuarioId = UsuarioId };
             var registrado = await _salas.RegistrarDisparoAsync(Context.ConnectionId, publicado);
-            if (!registrado) throw new HubException("No se pudo registrar el disparo (la ronda no está activa o la bala ya existe).");
+            if (!registrado) return;
         }
 
         public Task<ResultadoImpactoDto> RegistrarImpacto(string balaId)

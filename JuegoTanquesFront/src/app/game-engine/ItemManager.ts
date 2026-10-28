@@ -73,7 +73,7 @@ export class ItemManager {
       oruga: 'assets/imgs/powers/oruga.png',
       falla: 'assets/imgs/powers/falla.png'
     };
-    const imagePath = imagePaths[randomType] ?? 'assets/imgs/powerups/heal.png';
+    const imagePath = imagePaths[randomType] ?? 'assets/imgs/powers/botiquin.png';
 
     const img = new Image();
     img.src = imagePath;

@@ -113,8 +113,11 @@ export class SignalrService {
 
     console.log('🔍 [SignalR] Token extraído y limpio:', token ? 'SÍ EXISTE 🟢 (Longitud: ' + token.length + ')' : 'NO EXISTE 🔴');
 
-    const baseUrl = environment.baseUrl.replace('/api', '');
-    const hubUrl = `${baseUrl}/salasHub`;
+    const hubUrl =
+      environment.baseUrl.replace(/\/api\/?$/, '') + '/salasHub';
+
+    console.log('🌐 [SignalR] Conectando al Hub:', hubUrl);
+
 
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {

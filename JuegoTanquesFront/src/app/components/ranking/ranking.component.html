@@ -1,78 +1,29 @@
 <ion-content class="ranking-bg">
   <div class="ranking-container">
-
-    <!-- Tarjeta Principal Glassmorphism -->
     <div class="glass-ranking-card">
-
-      <!-- Título principal -->
-      <div class="ranking-header">
-        <ion-icon name="trophy-outline" class="header-icon"></ion-icon>
-        <h2>SALÓN DE LA FAMA</h2>
-      </div>
-
-      <!-- Selector / Segmento de Filtros -->
+      <div class="ranking-header"><ion-icon name="trophy-outline" class="header-icon"></ion-icon><h2>SALÓN DE LA FAMA</h2></div>
       <ion-segment [value]="filtroActual()" (ionChange)="cambiarFiltro($event)" class="custom-segment">
-        <ion-segment-button value="nivel">
-          <ion-label>Por Nivel</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="victorias">
-          <ion-label>Por Victorias</ion-label>
-        </ion-segment-button>
+        <ion-segment-button value="nivel"><ion-label>Por Nivel</ion-label></ion-segment-button>
+        <ion-segment-button value="victorias"><ion-label>Por Victorias</ion-label></ion-segment-button>
       </ion-segment>
-
-      <p *ngIf="store.rankingCargando() && store.ranking().length === 0" style="text-align: center; opacity: 0.7;">Cargando ranking…</p>
-      <p *ngIf="store.rankingError()" style="color: #ff4961; text-align: center; font-size: 13px;">{{ store.rankingError() }}</p>
-      <p *ngIf="!store.rankingCargando() && !store.rankingError() && store.ranking().length === 0"
-         style="text-align: center; opacity: 0.7;">Todavía no hay jugadores en el ranking.</p>
-
-      <!-- Lista de Jugadores -->
+      <p *ngIf="store.rankingCargando() && store.ranking().length === 0" class="ranking-notice">Cargando ranking…</p>
+      <p *ngIf="store.rankingError()" class="ranking-notice ranking-error">{{ store.rankingError() }}</p>
+      <p *ngIf="!store.rankingCargando() && !store.rankingError() && store.ranking().length === 0" class="ranking-notice">Todavía no hay jugadores en el ranking.</p>
       <div class="ranking-list-container">
-        <div *ngFor="let jugador of jugadoresOrdenados()"
-             class="ranking-item"
-             [ngClass]="{
-            'top-1': jugador.posicion === 1,
-            'top-2': jugador.posicion === 2,
-            'top-3': jugador.posicion === 3
-          }">
-
-          <!-- Medalla / Posición -->
+        <div *ngFor="let jugador of jugadoresOrdenados()" class="ranking-item"
+             [ngClass]="{ 'top-1': jugador.posicion === 1, 'top-2': jugador.posicion === 2, 'top-3': jugador.posicion === 3 }">
           <div class="position-badge">
-            <span *ngIf="jugador.posicion === 1">🥇</span>
-            <span *ngIf="jugador.posicion === 2">🥈</span>
-            <span *ngIf="jugador.posicion === 3">🥉</span>
+            <span *ngIf="jugador.posicion === 1">🥇</span><span *ngIf="jugador.posicion === 2">🥈</span><span *ngIf="jugador.posicion === 3">🥉</span>
             <span *ngIf="(jugador.posicion ?? 0) > 3">#{{ jugador.posicion }}</span>
           </div>
-
-          <!-- 🟢 FOTO DE PERFIL / AVATAR DEL JUGADOR -->
-          <div class="player-avatar-container" style="margin-right: 12px; display: flex; align-items: center;">
-            <img [src]="jugador.fotoPerfil || 'assets/imgs/tanques/scout.png'"
-                 alt="Avatar"
-                 style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #d4af37;" />
-          </div>
-
-          <!-- Información del Jugador -->
+          <div class="player-avatar-container"><img [src]="jugador.fotoPerfil || 'assets/imgs/tanques/scout.png'" alt="Avatar" /></div>
           <div class="player-info">
             <span class="player-name">{{ jugador.nombre }}<span *ngIf="esYo(jugador)"> (tú)</span></span>
-            <span class="player-stats">
-              <span *ngIf="filtroActual() === 'nivel'">Nivel {{ jugador.nivel }}</span>
-              <span *ngIf="filtroActual() === 'victorias'">{{ jugador.victorias }} V / {{ jugador.derrotas }} D</span>
-            </span>
+            <span class="player-stats"><span *ngIf="filtroActual() === 'nivel'">Nivel {{ jugador.nivel }}</span><span *ngIf="filtroActual() === 'victorias'">{{ jugador.victorias }} V / {{ jugador.derrotas }} D</span></span>
           </div>
-
-          <!-- Indicador Resaltado -->
-          <div class="score-badge">
-            <ng-container *ngIf="filtroActual() === 'nivel'">
-              ⭐ Nv. {{ jugador.nivel }}
-            </ng-container>
-            <ng-container *ngIf="filtroActual() === 'victorias'">
-              ⚔️ {{ jugador.victorias }}
-            </ng-container>
-          </div>
-
+          <div class="score-badge"><ng-container *ngIf="filtroActual() === 'nivel'">⭐ Nv. {{ jugador.nivel }}</ng-container><ng-container *ngIf="filtroActual() === 'victorias'">⚔️ {{ jugador.victorias }}</ng-container></div>
         </div>
       </div>
-
     </div>
-
   </div>
 </ion-content>
