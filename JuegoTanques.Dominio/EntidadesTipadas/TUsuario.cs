@@ -23,5 +23,6 @@ namespace JuegoTanques.Dominio.EntidadesTipadas
         public int Monedas { get; set; }
 
         public DateTime? FechaRegistro { get; set; }
+    
     }
 }

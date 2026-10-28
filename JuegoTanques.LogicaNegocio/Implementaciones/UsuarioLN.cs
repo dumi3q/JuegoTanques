@@ -90,5 +90,29 @@ namespace JuegoTanques.LogicaNegocio.Implementaciones
             return Respuesta<IEnumerable<TUsuario>>.Ok(
                 _mapper.Map<IEnumerable<TUsuario>>(respuestaAD.Data));
         }
+
+        // 🟢 NUEVO MÉTODO INTEGRADO: Actualizar la foto de perfil
+        public async Task<Respuesta<bool>> ActualizarFotoPerfilAsync(int usuarioId, string fotoBase64)
+        {
+            // 1. Buscamos la entidad en la base de datos
+            var buscar = await _unidadTrabajo.TUsuario
+                .ObtenerEntidadAsync(x => x.UsuarioId == usuarioId);
+
+            if (!buscar.Success || buscar.Data == null)
+                return Respuesta<bool>.Fail("Usuario no encontrado.");
+
+            var entidadUsuario = buscar.Data;
+
+            // 2. Asignamos la nueva cadena de la foto (asegúrate de que tu propiedad en la entidad se llame foto_perfil o fotoPerfil)
+            entidadUsuario.FotoPerfil = fotoBase64;
+
+            // 3. Modificamos usando el repositorio existente
+            var respuestaAD = await _unidadTrabajo.TUsuario.ModificarAsync(entidadUsuario);
+
+            if (!respuestaAD.Success)
+                return Respuesta<bool>.Fail(respuestaAD.Error);
+
+            return Respuesta<bool>.Ok(true);
+        }
     }
 }

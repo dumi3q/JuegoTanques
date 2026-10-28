@@ -10,6 +10,5 @@
   <ItemGroup>
     <Folder Include="src\assets\imgs\armas\" />
     <Folder Include="src\assets\imgs\powers\" />
-    <Folder Include="src\assets\imgs\tanques\" />
   </ItemGroup>
 </Project>

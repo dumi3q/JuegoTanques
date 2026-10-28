@@ -1,23 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
 import {
   IonContent, IonIcon, IonButton, IonBadge,
-  IonSegment, IonSegmentButton, IonLabel, IonCard
+  IonSegment, IonSegmentButton, IonLabel, IonCard,
+  ViewWillEnter
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
   personOutline, shieldOutline, hardwareChipOutline,
-  ribbonOutline, constructOutline, bookmarkOutline
+  ribbonOutline, constructOutline, bookmarkOutline, cameraOutline
 } from 'ionicons/icons';
-
-interface Preset {
-  id: number;
-  nombre: string;
-  tanque: string;
-  arma: string;
-  equipamiento: string;
-}
+import { JuegoStore } from '../../services/juego-store.service';
+import { IPreset } from '../../models/IJuego';
+import { Arma, Tanque } from '../../models/game-data';
+import { codigoArma, codigoTanque, idDeCodigo } from '../../models/CatalogoUtil';
 
 @Component({
   selector: 'app-perfil',
@@ -37,40 +35,34 @@ interface Preset {
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.scss'],
 })
-export class PerfilComponent {
+export class PerfilComponent implements OnInit, ViewWillEnter {
+  readonly store = inject(JuegoStore);
 
-  // Datos del Jugador
-  jugador = {
-    nombre: 'Comandante_Alpha',
-    nivel: 24,
-    avatar: 'assets/imgs/avatars/user1.png',
-    monedas: 1450,
-    tanqueEquipado: 'M4 Sherman (Mediano)',
-    armaEquipada: 'Cañón de 75mm M3',
-    equipamientoActivo: 'Blindaje Adicional + Orugas Reforzadas'
-  };
-
-  // Pestaña activa ('general', 'inventario', 'presets')
   pestanaActiva: string = 'general';
 
-  // Inventario disponible
-  inventarioTanques = [
-    { nombre: 'M4 Sherman', tipo: 'Mediano', estado: 'Equipado', img: 'assets/imgs/tanques/sherman.png' },
-    { nombre: 'T-34/85', tipo: 'Mediano', estado: 'En Garage', img: 'assets/imgs/tanques/t34.png' },
-    { nombre: 'Tiger I', tipo: 'Pesado', estado: 'En Garage', img: 'assets/imgs/tanques/tiger.png' }
-  ];
+  readonly mensaje = signal('');
+  readonly ocupado = signal(false);
 
-  inventarioArmas = [
-    { nombre: 'Cañón de 75mm M3', tipo: 'Principal', estado: 'Equipado' },
-    { nombre: 'Obús de 105mm', tipo: 'Artillería', estado: 'Disponible' },
-    { nombre: 'Ametralladora Calibre .50', tipo: 'Secundaria', estado: 'Disponible' }
-  ];
+  readonly tanquesPoseidos = computed(() => {
+    const ids = this.store.inventario().tanqueIds;
+    return this.store.tanques().filter(t => ids.includes(idDeCodigo(t.tanque_id)));
+  });
 
-  // Presets de Combate
-  presets: Preset[] = [
-    { id: 1, nombre: 'Preset Asalto Rápido', tanque: 'M4 Sherman', arma: 'Cañón de 75mm M3', equipamiento: 'Orugas Rápidas' },
-    { id: 2, nombre: 'Preset Defensivo Pesado', tanque: 'Tiger I', arma: 'KwK 36 L/56', equipamiento: 'Blindaje Extra' }
-  ];
+  readonly armasPoseidas = computed(() => {
+    const ids = this.store.inventario().armaIds;
+    return this.store.armas().filter(a => ids.includes(idDeCodigo(a.arma_id)));
+  });
+
+  readonly nivel = computed(() => this.store.resumen()?.nivel ?? 1);
+
+  readonly rangoActual = computed(() => {
+    const n = this.nivel();
+    if (n >= 40) return 'General de División 🎖️';
+    if (n >= 30) return 'Coronel del Frente 🛡️';
+    if (n >= 20) return 'Capitán Veterano ⭐';
+    if (n >= 10) return 'Teniente de Blindados ⚔️';
+    return 'Recluta Novato 🪖';
+  });
 
   constructor() {
     addIcons({
@@ -79,27 +71,114 @@ export class PerfilComponent {
       'hardware-chip-outline': hardwareChipOutline,
       'ribbon-outline': ribbonOutline,
       'construct-outline': constructOutline,
-      'bookmark-outline': bookmarkOutline
+      'bookmark-outline': bookmarkOutline,
+      'camera-outline': cameraOutline
     });
   }
 
-  get rangoActual(): string {
-    if (this.nivel >= 40) return 'General de División 🎖️';
-    if (this.nivel >= 30) return 'Coronel del Frente 🛡️';
-    if (this.nivel >= 20) return 'Capitán Veterano ⭐';
-    if (this.nivel >= 10) return 'Teniente de Blindados ⚔️';
-    return 'Recluta Novato 🪖';
+  ngOnInit(): void {
+    if (!this.store.resumen()) void this.store.cargarTodo();
   }
 
-  get nivel(): number {
-    return this.jugador.nivel;
+  async ionViewWillEnter(): Promise<void> {
+    void this.store.cargarTodo();
+    try {
+      await ScreenOrientation.lock({ orientation: 'portrait' });
+    } catch (e) { }
   }
 
   cambiarPestana(event: any) {
     this.pestanaActiva = event.detail.value;
   }
 
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Image = reader.result as string;
+
+        void this.ejecutar(async () => {
+          await this.store.actualizarFotoPerfil(base64Image);
+          this.mensaje.set('¡Foto de perfil actualizada con éxito!');
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  nombreTanque(id: number): string {
+    return this.store.tanques().find(t => t.tanque_id === codigoTanque(id))?.nombre ?? `Tanque ${id}`;
+  }
+
+  nombreArma(id: number): string {
+    return this.store.armas().find(a => a.arma_id === codigoArma(id))?.nombre ?? `Arma ${id}`;
+  }
+
+  esTanqueEquipado(t: Tanque): boolean {
+    return this.store.tanqueEquipado()?.tanque_id === t.tanque_id;
+  }
+
+  esArmaEquipada(a: Arma): boolean {
+    return this.store.armaEquipada()?.arma_id === a.arma_id;
+  }
+
+  equiparTanque(t: Tanque) {
+    void this.ejecutar(async () => {
+      await this.store.equipar({ tanqueId: idDeCodigo(t.tanque_id) });
+      this.mensaje.set(`${t.nombre} equipado.`);
+    });
+  }
+
+  equiparArma(a: Arma) {
+    void this.ejecutar(async () => {
+      await this.store.equipar({ armaId: idDeCodigo(a.arma_id) });
+      this.mensaje.set(`${a.nombre} equipada.`);
+    });
+  }
+
+  cargarPreset(p: IPreset) {
+    void this.ejecutar(async () => {
+      await this.store.activarPreset(p.presetId);
+      this.mensaje.set(`Preset "${p.nombre}" cargado.`);
+    });
+  }
+
   guardarPresetActual() {
-    console.log('Guardando configuración actual como nuevo preset...');
+    const activo = this.store.presetActivo();
+    if (!activo) {
+      this.mensaje.set('Todavía no tienes un equipo activo.');
+      return;
+    }
+
+    const usados = this.store.presets().map(p => p.numeroSlot);
+    const libre = [1, 2, 3].find(slot => !usados.includes(slot));
+    if (!libre) {
+      this.mensaje.set('Ya usaste los 3 espacios de presets.');
+      return;
+    }
+
+    void this.ejecutar(async () => {
+      await this.store.guardarPreset({
+        numeroSlot: libre,
+        nombre: `Preset ${libre}`,
+        tanqueId: activo.tanqueId,
+        armaId: activo.armaId,
+      });
+      this.mensaje.set(`Equipo guardado como Preset ${libre}.`);
+    });
+  }
+
+  private async ejecutar(accion: () => Promise<void>): Promise<void> {
+    if (this.ocupado()) return;
+    this.ocupado.set(true);
+    this.mensaje.set('');
+    try {
+      await accion();
+    } catch (e) {
+      this.mensaje.set(this.store.mensajeDe(e));
+    } finally {
+      this.ocupado.set(false);
+    }
   }
 }

@@ -17,32 +17,57 @@
         </ion-segment-button>
       </ion-segment>
 
+      <p *ngIf="store.error()" style="color: #ff4961; text-align: center; font-size: 13px; margin: 8px 0;">{{ store.error() }}</p>
+      <p *ngIf="mensaje()" style="color: #ffc409; text-align: center; font-size: 13px; margin: 8px 0;">{{ mensaje() }}</p>
+      <p *ngIf="store.cargando() && !store.resumen()" style="text-align: center; opacity: 0.7;">Cargando tu perfil…</p>
+
       <!-- ================= VISTA 1: IDENTIDAD / GENERAL ================= -->
-      <div *ngIf="pestanaActiva === 'general'" class="tab-content animate-fade">
+      <div *ngIf="pestanaActiva === 'general' && store.resumen() as j" class="tab-content animate-fade">
 
         <div class="profile-header-card">
-          <div class="avatar-container">
-            <div class="avatar-ring">
-              <span class="level-badge">Lv. {{ jugador.nivel }}</span>
+          <div class="avatar-container" style="text-align: center; position: relative;">
+
+            <!-- Avatar / Foto de Perfil limpia y sin duplicados -->
+            <div class="profile-avatar-container" style="display: flex; justify-content: center; margin-bottom: 10px;">
+              <img [src]="j.fotoPerfil || 'assets/imgs/tanques/scout.png'"
+                   alt="Foto de Perfil"
+                   class="profile-avatar-img"
+                   style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #d4af37;" />
+            </div>
+
+            <!-- Input oculto para abrir los archivos del celular -->
+            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;" />
+
+            <!-- Botón flotante para cambiar foto -->
+            <div style="margin-top: 8px;">
+              <ion-button size="small" fill="solid" color="warning" (click)="fileInput.click()" style="font-size: 11px;">
+                <ion-icon name="camera-outline" slot="start"></ion-icon>
+                Cambiar Foto
+              </ion-button>
+            </div>
+
+            <div style="margin-top: 6px;">
+              <span class="level-badge" style="font-size: 12px; color: #ffc409;">Lv. {{ j.nivel }}</span>
             </div>
           </div>
-          <div class="profile-titles">
-            <h2>{{ jugador.nombre }}</h2>
-            <p class="rank-title">{{ rangoActual }}</p>
-            <div class="coins-pill">
-              🪙 {{ jugador.monedas }} Monedas
+
+          <div class="profile-titles" style="text-align: center; margin-top: 10px;">
+            <h2>{{ j.nombre }}</h2>
+            <p class="rank-title">{{ rangoActual() }}</p>
+            <div class="coins-pill" style="display: inline-block; margin-top: 4px;">
+              🪙 {{ j.monedas }} Monedas
             </div>
           </div>
         </div>
 
-        <div class="loadout-summary">
+        <div class="loadout-summary" style="margin-top: 20px;">
           <h3>Equipamiento Activo en Combate</h3>
 
           <div class="loadout-item">
             <ion-icon name="shield-outline"></ion-icon>
             <div class="loadout-info">
               <span>Tanque Principal</span>
-              <strong>{{ jugador.tanqueEquipado }}</strong>
+              <strong>{{ store.tanqueEquipado()?.nombre || 'Sin equipar' }}</strong>
             </div>
           </div>
 
@@ -50,15 +75,23 @@
             <ion-icon name="hardware-chip-outline"></ion-icon>
             <div class="loadout-info">
               <span>Armamento</span>
-              <strong>{{ jugador.armaEquipada }}</strong>
+              <strong>{{ store.armaEquipada()?.nombre || 'Sin equipar' }}</strong>
+            </div>
+          </div>
+
+          <div class="loadout-item">
+            <ion-icon name="ribbon-outline"></ion-icon>
+            <div class="loadout-info">
+              <span>Experiencia</span>
+              <strong>{{ j.experiencia }} / {{ j.experienciaSiguienteNivel }} XP</strong>
             </div>
           </div>
 
           <div class="loadout-item">
             <ion-icon name="construct-outline"></ion-icon>
             <div class="loadout-info">
-              <span>Módulos Extra</span>
-              <strong>{{ jugador.equipamientoActivo }}</strong>
+              <span>Récord de Batalla</span>
+              <strong>{{ j.victorias }} victorias · {{ j.derrotas }} derrotas</strong>
             </div>
           </div>
         </div>
@@ -69,53 +102,65 @@
       <div *ngIf="pestanaActiva === 'inventario'" class="tab-content animate-fade">
         <h3>Tanques en Propiedad</h3>
         <div class="inventory-grid">
-          <div *ngFor="let t of inventarioTanques" class="inv-card" [class.equipped]="t.estado === 'Equipado'">
+          <div *ngFor="let t of tanquesPoseidos()" class="inv-card" [class.equipped]="esTanqueEquipado(t)">
             <div class="inv-img-box">
-              <img [src]="t.img" [alt]="t.nombre" />
+              <img [src]="t.imagenTienda" [alt]="t.nombre" />
             </div>
             <div class="inv-details">
               <h4>{{ t.nombre }}</h4>
-              <span>{{ t.tipo }}</span>
-              <ion-badge [color]="t.estado === 'Equipado' ? 'warning' : 'medium'">
-                {{ t.estado }}
-              </ion-badge>
+              <span>{{ t.vida_base }} HP · Blindaje {{ t.blindaje }}</span>
+              <ion-badge *ngIf="esTanqueEquipado(t)" color="warning">Equipado</ion-badge>
+              <ion-button *ngIf="!esTanqueEquipado(t)" size="small" fill="outline" color="warning"
+                          [disabled]="ocupado()" (click)="equiparTanque(t)">
+                Equipar
+              </ion-button>
             </div>
           </div>
         </div>
+        <p *ngIf="tanquesPoseidos().length === 0" style="opacity: 0.7; font-size: 13px;">Aún no tienes tanques.</p>
 
         <h3 style="margin-top: 16px;">Armas Desbloqueadas</h3>
         <div class="weapons-list">
-          <div *ngFor="let w of inventarioArmas" class="weapon-row">
+          <div *ngFor="let w of armasPoseidas()" class="weapon-row">
             <div>
               <strong>{{ w.nombre }}</strong>
-              <small>{{ w.tipo }}</small>
+              <small>Daño {{ w.danio_base }} · Cadencia {{ w.cadencia_fuego }}</small>
             </div>
-            <ion-badge [color]="w.estado === 'Equipado' ? 'warning' : 'light'">
-              {{ w.estado }}
-            </ion-badge>
+            <ion-badge *ngIf="esArmaEquipada(w)" color="warning">Equipada</ion-badge>
+            <ion-button *ngIf="!esArmaEquipada(w)" size="small" fill="outline" color="warning"
+                        [disabled]="ocupado()" (click)="equiparArma(w)">
+              Equipar
+            </ion-button>
           </div>
         </div>
+        <p *ngIf="armasPoseidas().length === 0" style="opacity: 0.7; font-size: 13px;">Aún no tienes armas.</p>
       </div>
 
       <!-- ================= VISTA 3: PRESETS ================= -->
       <div *ngIf="pestanaActiva === 'presets'" class="tab-content animate-fade">
         <div class="presets-header">
           <h3>Tus Configuraciones</h3>
-          <ion-button size="small" class="action-btn" (click)="guardarPresetActual()">
+          <ion-button size="small" class="action-btn" [disabled]="ocupado()" (click)="guardarPresetActual()">
             Guardar Actual
           </ion-button>
         </div>
 
         <div class="presets-list">
-          <div *ngFor="let p of presets" class="preset-card">
+          <div *ngFor="let p of store.presets()" class="preset-card">
             <div class="preset-info">
-              <h4><ion-icon name="bookmark-outline"></ion-icon> {{ p.nombre }}</h4>
-              <p>🛡️ {{ p.tanque }} | ⚔️ {{ p.arma }}</p>
-              <small>🛠️ {{ p.equipamiento }}</small>
+              <h4>
+                <ion-icon name="bookmark-outline"></ion-icon> {{ p.nombre }}
+                <ion-badge *ngIf="p.esActivo" color="warning" style="margin-left: 6px;">Activo</ion-badge>
+              </h4>
+              <p>🛡️ {{ nombreTanque(p.tanqueId) }} | ⚔️ {{ nombreArma(p.armaId) }}</p>
             </div>
-            <ion-button fill="outline" size="small" color="warning">Cargar</ion-button>
+            <ion-button fill="outline" size="small" color="warning"
+                        [disabled]="p.esActivo || ocupado()" (click)="cargarPreset(p)">
+              {{ p.esActivo ? 'En uso' : 'Cargar' }}
+            </ion-button>
           </div>
         </div>
+        <p *ngIf="store.presets().length === 0" style="opacity: 0.7; font-size: 13px;">Aún no tienes presets.</p>
       </div>
 
     </div>

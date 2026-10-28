@@ -1,32 +1,31 @@
-import { GameMap } from './GameMap';
+import { GameMap } from '../game-engine/GameMap';
 import { Tanque } from '../models/game-data';
 
 export class Tank {
+  public turretAngle: number = 0;
   public x: number;
   public y: number;
-  public width: number = 44;   // Ancho visual ajustado para la celda
-  public height: number = 44;  // Alto visual ajustado para la celda
-  public angle: number = 0;    // Ángulo en radianes hacia donde apunta el chasis
+  public width: number = 75;
+  public height: number = 75;
+  public angle: number = 0;
 
-  // Stats dinámicas extraídas directamente de la base de datos (game-data)
-  public data: Tanque;
   public currentHp: number;
   public currentSpeed: number;
+  public isPlayer: boolean;
 
   private tankImage: HTMLImageElement | null = null;
   private imageLoaded: boolean = false;
 
-  constructor(startX: number, startY: number, tanqueData: Tanque) {
+  constructor(startX: number, startY: number, public tankData: Tanque, isPlayer: boolean = true) {
     this.x = startX;
     this.y = startY;
-    this.data = tanqueData;
+    this.tankData = tankData;
+    this.isPlayer = isPlayer;
 
-    // Stats reales basadas en el tipo de tanque
-    this.currentHp = tanqueData.vida_base;
-    // Factor de escala para movimiento fluido a 60 FPS en el Canvas
-    this.currentSpeed = tanqueData.velocidad_base * 0.45;
+    this.currentHp = tankData.vida_base;
+    this.currentSpeed = (tankData.velocidad_base || 2) * 0.45;
 
-    this.loadTankImage(tanqueData.imagen);
+    this.loadTankImage(tankData.imagenJuego);
   }
 
   private loadTankImage(path: string) {
@@ -39,33 +38,32 @@ export class Tank {
     }
   }
 
-  // Desplazamiento dinámico respetando la velocidad del tanque seleccionado
   public move(dx: number, dy: number, gameMap: GameMap, canvasWidth: number, canvasHeight: number) {
-    const nextX = this.x + dx * this.currentSpeed;
-    const nextY = this.y + dy * this.currentSpeed;
-
-    // Actualizamos la rotación suavemente hacia la dirección de la marcha
     if (dx !== 0 || dy !== 0) {
       this.angle = Math.atan2(dy, dx);
     }
 
-    // Validamos que las 4 esquinas del tanque estén libres en la matriz (36x64)
-    if (!this.checkCollision(nextX, nextY, canvasWidth, canvasHeight, gameMap)) {
+    // Deslizamiento independiente en X e Y para rebotar/resbalar contra las paredes sin trabarse
+    const nextX = this.x + dx * this.currentSpeed;
+    if (!this.checkCollision(nextX, this.y, canvasWidth, canvasHeight, gameMap)) {
       this.x = nextX;
+    }
+
+    const nextY = this.y + dy * this.currentSpeed;
+    if (!this.checkCollision(this.x, nextY, canvasWidth, canvasHeight, gameMap)) {
       this.y = nextY;
     }
   }
 
-  // Detección precisa contra la matriz de colisiones
   private checkCollision(x: number, y: number, canvasWidth: number, canvasHeight: number, gameMap: GameMap): boolean {
-    const margin = 8; // Margen para dar tolerancia natural en las esquinas de los edificios
+    const margin = 14;
     const left = x - this.width / 2 + margin;
     const right = x + this.width / 2 - margin;
     const top = y - this.height / 2 + margin;
     const bottom = y + this.height / 2 - margin;
 
-    const rows = gameMap.currentMap.filas;
-    const cols = gameMap.currentMap.columnas;
+    const rows = gameMap.currentMap.matrizColisiones.length;
+    const cols = gameMap.currentMap.matrizColisiones[0].length;
     const tileWidth = canvasWidth / cols;
     const tileHeight = canvasHeight / rows;
 
@@ -77,31 +75,57 @@ export class Tank {
     ];
 
     for (const corner of corners) {
+      if (corner.r < 0 || corner.r >= rows || corner.c < 0 || corner.c >= cols) return true;
       if (gameMap.isWall(corner.r, corner.c)) {
-        return true; // Colisión detectada
+        return true;
       }
     }
 
-    return false; // Área despejada
+    return false;
   }
 
-  // Renderizado del tanque en el canvas
-  public draw(ctx: CanvasRenderingContext2D) {
+  public draw(ctx: CanvasRenderingContext2D, activeEffect: string | null = null, teamAuraColor?: string) {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
 
+    // En online, teamAuraColor es autoritativo: azul para aliados y rojo para enemigos.
+    // En offline, donde no se pasa, se conserva el comportamiento original de los efectos.
+    let auraColor = teamAuraColor ?? (this.isPlayer ? '#00d2ff' : '#ff2222');
+    let auraBlur = this.isPlayer ? 15 : 18;
+    let effectColor: string | null = null;
+
+    if (activeEffect === 'ESCUDO') {
+      effectColor = '#00ffff'; auraBlur = 25;
+    } else if (activeEffect === 'ORUGA') {
+      effectColor = '#00ff00'; auraBlur = 20;
+    } else if (activeEffect === 'SOBRECARGA') {
+      effectColor = '#ffaa00'; auraBlur = 22;
+    } else if (activeEffect === 'ACEITE' || activeEffect === 'FALLA') {
+      effectColor = '#ff0055'; auraBlur = 20;
+    } else if (activeEffect === 'ROJO') {
+      effectColor = '#ff1111'; auraBlur = 18;
+    }
+    if (!teamAuraColor && effectColor) auraColor = effectColor;
+
+    ctx.shadowBlur = auraBlur;
+    ctx.shadowColor = auraColor;
+
+    if (activeEffect && activeEffect !== 'ROJO') {
+      ctx.strokeStyle = effectColor ?? auraColor;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(0, 0, this.width / 2 + 10, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
     if (this.imageLoaded && this.tankImage) {
-      // Dibujar Sprite PNG Oficial
       ctx.drawImage(this.tankImage, -this.width / 2, -this.height / 2, this.width, this.height);
     } else {
-      // Dibujo vectorial táctico de respaldo por si la imagen PNG no existe aún
-      ctx.fillStyle = '#10b981'; // Verde Scout
+      ctx.fillStyle = teamAuraColor ?? (this.isPlayer ? '#10b981' : '#ef4444');
       ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
-
-      // Detalle del cañón apuntando hacia la derecha (0 rads)
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, -3, this.width / 2 + 10, 6);
+      ctx.fillRect(0, -4, this.width / 2 + 10, 8);
     }
 
     ctx.restore();

@@ -3,6 +3,35 @@
   height: 100%;
   width: 100%;
 }
+/* Contenedor principal adaptable para celulares */
+.glass-perfil-card,
+.glass-ranking-card,
+.glass-config-card { /* O la clase general que usen tus contenedores */
+  width: 92% !important;
+  max-width: 550px !important;
+  max-height: 85vh !important; /* Evita que crezca más allá de la pantalla del celular */
+  margin: 10px auto !important;
+  padding: 16px !important;
+  overflow-y: auto !important; /* Permite hacer scroll interno si el contenido es largo */
+}
+
+/* Ajuste específico para el contenedor de la foto de perfil en móvil */
+.profile-avatar-img {
+  width: 75px !important;
+  height: 75px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 2px solid #d4af37;
+}
+
+/* Contenedor general de las vistas para evitar que se salgan en horizontal */
+.perfil-container, .ranking-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 10px;
+}
 
 .perfil-bg {
   --background: url('/assets/imgs/profile.jpg') no-repeat center center / cover !important;

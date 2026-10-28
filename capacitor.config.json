@@ -1,0 +1,8 @@
+{
+  "appId": "com.tanques.juego",
+  "appName": "Juego Tanques",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

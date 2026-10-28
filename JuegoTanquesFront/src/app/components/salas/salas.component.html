@@ -10,6 +10,7 @@
           <h2>ZONA DE OPERACIONES</h2>
           <p>Únete a una sala activa o despliega una nueva</p>
         </div>
+        <!-- ✅ CORREGIDO -->
         <ion-button class="create-btn" (click)="abrirModalCrear()">
           <ion-icon name="add-circle-outline" slot="start"></ion-icon>
           CREAR SALA
@@ -35,16 +36,16 @@
           <div class="sala-info">
             <div class="sala-title-row">
               <h4>{{ sala.nombre }}</h4>
-              <ion-badge [color]="sala.esPrivada ? 'danger' : 'success'">
-                <ion-icon [name]="sala.esPrivada ? 'lock-closed-outline' : 'globe-outline'"></ion-icon>
-                {{ sala.esPrivada ? ('Privada ' + (sala.codigo ? '[' + sala.codigo + ']' : '')) : 'Pública' }}
+              <ion-badge [color]="sala.privada ? 'danger' : 'success'">
+                <ion-icon [name]="sala.privada ? 'lock-closed-outline' : 'globe-outline'"></ion-icon>
+                {{ sala.privada ? ('Privada [' + sala.codigo + ']') : 'Pública' }}
               </ion-badge>
             </div>
 
             <p class="sala-details">
-              🗺️ <strong>{{ sala.mapa }}</strong> |
+              🗺️ <strong>{{ sala.mapaId }}</strong> |
               🔄 Rondas: {{ sala.rondas }} |
-              👥 Equipos: {{ sala.modoEquipos ? 'Sí' : 'No' }}
+              👥 Host: {{ sala.hostNombre || 'Anfitrión' }}
             </p>
           </div>
 
@@ -54,7 +55,8 @@
               <span>{{ sala.jugadoresActuales }} / {{ sala.jugadoresMaximos }}</span>
             </div>
 
-            <ion-button size="small" class="join-btn" (click)="unirseSala(sala)" [disabled]="sala.jugadoresActuales >= sala.jugadoresMaximos">
+            <!-- 🟢 CORREGIDO: Le pasamos directamente el string de la propiedad 'codigo' al método -->
+            <ion-button size="small" class="join-btn" (click)="unirseSala(sala.codigo)" [disabled]="sala.jugadoresActuales >= sala.jugadoresMaximos">
               <ion-icon name="play-outline" slot="start"></ion-icon>
               UNIRSE
             </ion-button>
@@ -87,7 +89,7 @@
               <ion-input [(ngModel)]="nuevaSala.nombre" placeholder="Ej. Batalla Final"></ion-input>
             </div>
 
-            <!-- SELECTOR DE MAPA CON CARRUSEL DE IMAGEN (Sincronizado con MAPAS_JUEGO) -->
+            <!-- SELECTOR DE MAPA CON CARRUSEL DE IMAGEN -->
             <div class="form-group">
               <label>Seleccionar Mapa de Combate</label>
               <div class="map-carousel">
@@ -103,7 +105,7 @@
 
                   <div class="map-overlay">
                     <span class="map-title">{{ mapaSeleccionado.nombre }}</span>
-                    <small class="map-subtitle">{{ mapaSeleccionado.estilo }}</small>
+                    <small class="map-subtitle">{{ mapaSeleccionado.tipo }}</small>
                   </div>
                 </div>
 
@@ -121,7 +123,7 @@
 
               <div class="form-group">
                 <label>Vidas por Jugador: {{ nuevaSala.vidas }}</label>
-                <ion-range min="1" max="5" step="1" [(ngModel)]="nuevaSala.vidas" color="warning"></ion-range>
+                <ion-range min="1" max="3" step="1" [(ngModel)]="nuevaSala.vidas" color="warning"></ion-range>
               </div>
             </div>
 

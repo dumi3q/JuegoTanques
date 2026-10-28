@@ -1,20 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
+import { ViewWillEnter } from '@ionic/angular';
 import {
   IonContent, IonSegment, IonSegmentButton,
-  IonLabel, IonList, IonItem, IonAvatar, IonBadge, IonIcon
+  IonLabel, IonIcon
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { trophyOutline, medalOutline, starOutline } from 'ionicons/icons';
-
-interface JugadorRanking {
-  posicion: number;
-  nombre: string;
-  nivel: number;
-  victorias: number;
-  derrotas: number;
-  avatar: string;
-}
+import { JuegoStore } from '../../services/juego-store.service';
+import { IRankingItem } from '../../models/IJuego';
 
 @Component({
   selector: 'app-ranking',
@@ -25,27 +20,25 @@ interface JugadorRanking {
     IonSegment,
     IonSegmentButton,
     IonLabel,
-    IonList,
-    IonItem,
-    IonAvatar,
-    IonBadge,
     IonIcon
   ],
   templateUrl: './ranking.component.html',
   styleUrls: ['./ranking.component.scss'],
 })
-export class RankingComponent {
+export class RankingComponent implements OnInit, ViewWillEnter {
+  readonly store = inject(JuegoStore);
 
-  filtroActual: 'nivel' | 'victorias' = 'nivel';
+  readonly filtroActual = signal<'nivel' | 'victorias'>('nivel');
 
-  jugadores: JugadorRanking[] = [
-    { posicion: 1, nombre: 'Comandante_Viper', nivel: 45, victorias: 120, derrotas: 15, avatar: 'assets/imgs/avatars/user1.png' },
-    { posicion: 2, nombre: 'Tank_Destroyer', nivel: 42, victorias: 105, derrotas: 22, avatar: 'assets/imgs/avatars/user2.png' },
-    { posicion: 3, nombre: 'Iron_Shield', nivel: 38, victorias: 89, derrotas: 30, avatar: 'assets/imgs/avatars/user3.png' },
-    { posicion: 4, nombre: 'Shadow_Artillery', nivel: 30, victorias: 64, derrotas: 28, avatar: 'assets/imgs/avatars/user4.png' },
-    { posicion: 5, nombre: 'Ghost_Rider_CR', nivel: 25, victorias: 51, derrotas: 40, avatar: 'assets/imgs/avatars/user5.png' },
-    { posicion: 6, nombre: 'Alpha_Strike', nivel: 18, victorias: 32, derrotas: 20, avatar: 'assets/imgs/avatars/user6.png' }
-  ];
+  readonly jugadoresOrdenados = computed<IRankingItem[]>(() => {
+    const lista = [...this.store.ranking()];
+    if (this.filtroActual() === 'nivel') {
+      lista.sort((a, b) => b.nivel - a.nivel || b.victorias - a.victorias);
+    } else {
+      lista.sort((a, b) => b.victorias - a.victorias || b.nivel - a.nivel);
+    }
+    return lista.map((j, i) => ({ ...j, posicion: i + 1 }));
+  });
 
   constructor() {
     addIcons({
@@ -55,19 +48,22 @@ export class RankingComponent {
     });
   }
 
-  // Ordena dinámicamente según la opción seleccionada
-  get jugadoresOrdenados(): JugadorRanking[] {
-    const lista = [...this.jugadores];
-    if (this.filtroActual === 'nivel') {
-      lista.sort((a, b) => b.nivel - a.nivel);
-    } else {
-      lista.sort((a, b) => b.victorias - a.victorias);
-    }
-    // Reasignar la posición según el ordenamiento
-    return lista.map((j, index) => ({ ...j, posicion: index + 1 }));
+  ngOnInit(): void {
+    void this.store.cargarRanking();
+  }
+
+  async ionViewWillEnter(): Promise<void> {
+    void this.store.cargarRanking();
+    try {
+      await ScreenOrientation.lock({ orientation: 'portrait' });
+    } catch (e) { }
   }
 
   cambiarFiltro(event: any) {
-    this.filtroActual = event.detail.value;
+    this.filtroActual.set(event.detail.value);
+  }
+
+  esYo(jugador: IRankingItem): boolean {
+    return jugador.usuarioId === this.store.resumen()?.usuarioId;
   }
 }

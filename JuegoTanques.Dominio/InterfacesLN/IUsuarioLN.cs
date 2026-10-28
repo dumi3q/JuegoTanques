@@ -12,5 +12,6 @@ namespace JuegoTanques.Dominio.InterfacesLN
         Task<Respuesta<bool>> EliminarAsync(int usuarioId);
         Task<Respuesta<TUsuario>> ObtenerPorIdAsync(int usuarioId);
         Task<Respuesta<IEnumerable<TUsuario>>> ListarAsync();
+        Task<Respuesta<bool>> ActualizarFotoPerfilAsync(int usuarioId, string fotoBase64);
     }
 }

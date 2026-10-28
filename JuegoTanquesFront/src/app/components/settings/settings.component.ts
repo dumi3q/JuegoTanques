@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
+import { ViewWillEnter } from '@ionic/angular';
 import {
   IonContent, IonList, IonItem, IonLabel, IonIcon,
   IonRange, IonToggle, IonSelect, IonSelectOption, IonButton
@@ -10,6 +12,7 @@ import {
   volumeHighOutline, gameControllerOutline, desktopOutline,
   saveOutline, refreshOutline
 } from 'ionicons/icons';
+import { AjustesService, IAjustes } from '../../services/ajustes.service';
 
 @Component({
   selector: 'app-configuracion',
@@ -31,9 +34,9 @@ import {
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
 })
-export class SettingsComponent {
+export class SettingsComponent implements ViewWillEnter {
+  private readonly servicio = inject(AjustesService);
 
-  // Variables de configuración visual
   volumenMusica: number = 75;
   volumenEfectos: number = 90;
   sensibilidadApuntado: number = 50;
@@ -41,9 +44,11 @@ export class SettingsComponent {
   apuntadoAsistido: boolean = true;
   vibracionImpacto: boolean = true;
   efectosHumo: boolean = true;
+  mostrarFps: boolean = false;
 
   calidadGrafica: string = 'alta';
-  modoPantalla: string = 'pantalla_completa';
+
+  readonly mensaje = signal('');
 
   constructor() {
     addIcons({
@@ -53,19 +58,48 @@ export class SettingsComponent {
       'save-outline': saveOutline,
       'refresh-outline': refreshOutline
     });
+
+    this.cargar(this.servicio.ajustes());
+  }
+
+  async ionViewWillEnter(): Promise<void> {
+    try {
+      await ScreenOrientation.lock({ orientation: 'portrait' });
+    } catch (e) { }
   }
 
   guardarAjustes() {
-    console.log('Ajustes guardados correctamente');
+    this.servicio.guardar({
+      volumenMusica: this.volumenMusica,
+      volumenEfectos: this.volumenEfectos,
+      sensibilidadApuntado: this.sensibilidadApuntado,
+      apuntadoAsistido: this.apuntadoAsistido,
+      vibracionImpacto: this.vibracionImpacto,
+      efectosHumo: this.efectosHumo,
+      mostrarFps: this.mostrarFps,
+      calidadGrafica: this.calidadGrafica,
+    });
+    this.avisar('Ajustes guardados ✔');
   }
 
   restablecerValores() {
-    this.volumenMusica = 75;
-    this.volumenEfectos = 90;
-    this.sensibilidadApuntado = 50;
-    this.apuntadoAsistido = true;
-    this.vibracionImpacto = true;
-    this.efectosHumo = true;
-    this.calidadGrafica = 'alta';
+    this.cargar(this.servicio.restablecer());
+    this.avisar('Se restablecieron los valores por defecto.');
+  }
+
+  private cargar(a: IAjustes) {
+    this.volumenMusica = a.volumenMusica;
+    this.volumenEfectos = a.volumenEfectos;
+    this.sensibilidadApuntado = a.sensibilidadApuntado;
+    this.apuntadoAsistido = a.apuntadoAsistido;
+    this.vibracionImpacto = a.vibracionImpacto;
+    this.efectosHumo = a.efectosHumo;
+    this.mostrarFps = a.mostrarFps;
+    this.calidadGrafica = a.calidadGrafica;
+  }
+
+  private avisar(texto: string) {
+    this.mensaje.set(texto);
+    setTimeout(() => this.mensaje.set(''), 2500);
   }
 }

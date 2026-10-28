@@ -1,0 +1,84 @@
+<ion-content class="salas-bg">
+  <div class="salas-container" *ngIf="sala">
+
+    <!-- Tarjeta Principal Glassmorphism -->
+    <div class="glass-salas-card">
+
+      <!-- Encabezado de la Sala -->
+      <div class="salas-header">
+        <div>
+          <h2>SALA DE ESPERA</h2>
+          <p>Preparando despliegue de combate</p>
+        </div>
+        <ion-button color="danger" size="small" fill="outline" (click)="salirSala()">
+          <ion-icon name="exit-outline" slot="start"></ion-icon>
+          SALIR
+        </ion-button>
+      </div>
+
+      <!-- Tarjeta del Código de Acceso y Metadatos -->
+      <div class="code-banner">
+        <span class="code-label">CÓDIGO DE ACCESO</span>
+        <h1 class="code-value">{{ sala.codigo || sala.Codigo || 'SIN CÓDIGO' }}</h1>
+        <p class="sala-meta">
+          🗺️ Mapa: <strong>{{ sala.mapaId || sala.MapaId || 'Aleatorio' }}</strong> |
+          Rondas: {{ sala.rondas ?? sala.Rondas ?? 3 }} |
+          Vidas: {{ sala.vidas ?? sala.Vidas ?? 3 }}
+        </p>
+      </div>
+
+      <!-- Listado Real de Jugadores Conectados -->
+      <div class="slots-list-area">
+        <div *ngFor="let j of (sala.jugadores || sala.Jugadores)" class="slot-card-item">
+
+          <!-- 🟢 Foto de perfil integrada con el método seguro del TypeScript -->
+          <div class="player-avatar-container" style="width: 55px; height: 55px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #222; border: 2px solid #00d2ff;">
+            <img [src]="obtenerFotoPerfil(j)"
+                 [alt]="'Foto de perfil de ' + (j.nombre || j.Nombre || 'Jugador')"
+                 class="player-avatar"
+                 style="width: 100%; height: 100%; object-fit: cover;"
+                 loading="lazy"
+                 (error)="manejarErrorFoto($event)" />
+          </div>
+
+          <!-- Nombre y Preset del Jugador -->
+          <div class="player-info" style="margin-left: 12px; flex: 1;">
+            <div class="player-name-row" style="display: flex; align-items: center; gap: 8px;">
+              <h4 style="margin: 0; color: #fff; font-weight: bold;">{{ j.nombre || j.Nombre || 'Jugador' }}</h4>
+              <ion-badge color="warning" *ngIf="j.esHost || j.EsHost">HOST</ion-badge>
+            </div>
+            <p class="player-preset" style="margin: 4px 0 0 0; font-size: 12px; color: #aaa;">
+              🛡️ Tanque #{{ j.tanqueId || j.TanqueId || 1 }} | ⚔️ Arma #{{ j.armaId || j.ArmaId || 1 }}
+              <span *ngIf="sala.modoEquipos || sala.ModoEquipos"> | Equipo {{ (j.equipoId ?? j.EquipoId ?? 0) + 1 }}</span>
+            </p>
+          </div>
+
+          <!-- Estado de Listo -->
+          <div class="player-status-badge">
+            <ion-badge [color]="(j.listo || j.Listo) ? 'success' : 'medium'">
+              {{ (j.listo || j.Listo) ? 'LISTO' : 'ESPERANDO' }}
+            </ion-badge>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Acciones Inferiores -->
+      <div class="action-footer">
+        <p class="ready-help" style="color:#c7d3e7;text-align:center;margin:0 0 10px;">
+          La partida comienza automáticamente cuando todos los jugadores estén listos.
+        </p>
+        <ion-button expand="block"
+                    [color]="miEstadoListo ? 'success' : 'warning'"
+                    class="ready-btn"
+                    [disabled]="sala.enPartida || sala.EnPartida"
+                    (click)="marcarListo()">
+          <ion-icon [name]="miEstadoListo ? 'checkmark-circle-outline' : 'time-outline'" slot="start"></ion-icon>
+          {{ miEstadoListo ? 'ESTÁS LISTO — TOCA PARA CANCELAR' : 'ESTOY LISTO' }}
+        </ion-button>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>

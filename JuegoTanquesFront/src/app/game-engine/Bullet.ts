@@ -10,6 +10,7 @@ export class Bullet {
   private bounceCount: number = 0;
   private maxBounces: number = 0;
   private piercing: boolean = false; // true = traspasa paredes (habilidad Perforante)
+  public get isPiercing(): boolean { return this.piercing; }
   private angle: number = 0;
   private lifetime: number = 0;
 

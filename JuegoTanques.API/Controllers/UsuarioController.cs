@@ -2,6 +2,8 @@
 using JuegoTanques.Dominio.InterfacesLN;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace JuegoTanques.API.Controllers
 {
@@ -49,6 +51,37 @@ namespace JuegoTanques.API.Controllers
         {
             var respuesta = await _ln.EliminarAsync(usuarioId);
             return respuesta.Success ? Ok(respuesta.Data) : NotFound(respuesta.Error);
+        }
+
+        // 🟢 DTO Único
+        public class ActualizarFotoDto
+        {
+            public string FotoBase64 { get; set; }
+        }
+        [HttpPut("ActualizarFoto")]
+        [Authorize]
+        public async Task<IActionResult> ActualizarFoto([FromBody] ActualizarFotoDto modelo)
+        {
+            try
+            {
+                var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(usuarioIdClaim))
+                {
+                    return Unauthorized(new { error = "Token inválido o usuario no identificado." });
+                }
+
+                int usuarioId = int.Parse(usuarioIdClaim);
+                var respuesta = await _ln.ActualizarFotoPerfilAsync(usuarioId, modelo.FotoBase64);
+
+                // 🟢 Envuelto para que JuegoStore lo lea perfectamente en el formato IRespuesta
+                return respuesta.Success
+                    ? Ok(new { error = (string?)null, data = true })
+                    : BadRequest(new { error = respuesta.Error });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Error interno al actualizar la foto de perfil", detalle = ex.Message });
+            }
         }
     }
 }
